@@ -23,6 +23,13 @@ VOL_BAD_NAME=test56
 
 function tests_53_to_65() {
 
+    local log=$1
+    local msg
+
+    echo " ============================================================== "
+    echo " ================ Starting Tests 53-65  ======================== "
+    echo " ============================================================== "
+
 ########################################################################################################
 ########################################################################################################
 ########################################################################################################
@@ -36,10 +43,13 @@ function tests_53_to_65() {
     nova_createVolume STATUS "$USER1_PARAM" $VOL_GOOD_NAME $VOL_SIZE
     if [ "$STATUS" == "available" ];
     then
-	echo "PASSED Test 53: volume creation. Got status $STATUS"
+	msg="PASSED Test 53: volume creation. Got status $STATUS"
     else
-	echo "FAILED Test 53: volume creation. Got status $STATUS"
+	msg="FAILED Test 53: volume creation. Got status $STATUS"
     fi 
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
 
 ########################################################################################################
 # 54 nova user attach a volume and add contents 
@@ -78,11 +88,13 @@ function tests_53_to_65() {
     
     if [ "$STATUS" == "Hello" ];
     then
-	echo "PASSED Test 54: Format, write and read back"
+	msg="PASSED Test 54: Format, write and read back"
     else
-	echo "FAILED Test 54: Read back $STATUS"
+	msg="FAILED Test 54: Read back $STATUS"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
     sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
 
 
@@ -96,11 +108,12 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" != "available" ];
     then
-	echo "FAILED test 60: Volume status $STATUS"
+	msg="FAILED test 60: Volume status $STATUS"
     else
-	echo "PASSED test 60: After detachment volume status is $STATUS"
+	msg="PASSED test 60: After detachment volume status is $STATUS"
     fi
-  
+    echo "${msg}"
+    write_log "${msg}" "${log}"
 
     ########################################################################################################
     # 55 nova user: attach a volume to an unauthorized instance 
@@ -113,10 +126,12 @@ function tests_53_to_65() {
     nova_attachedTo STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" == "$INST_BAD_NAME" ];
     then
-	echo "FAILED: Volume actually attached (test55): $STATUS"
+	msg="FAILED: Volume actually attached (test55): $STATUS"
     else
-	echo "PASSED test 55: attachment to unauthorized instance failed: $STATUS"
+	msg="PASSED test 55: attachment to unauthorized instance failed: $STATUS"
     fi
+    echo "${msg}"
+    write_log "${msg}" "${log}"
 
     # Clean up: kill the instance
     echo "Deleting instance $INST_BAD_NAME"
@@ -132,7 +147,8 @@ function tests_53_to_65() {
     nova_createVolume STATUS "$USER2_PARAM" $VOL_BAD_NAME $VOL_SIZE
     if [ "$STATUS" != "available" ];
     then
-	echo "Failed to create valume for test 56: got status $STATUS"
+	msg="Failed to create valume for test 56: got status $STATUS"
+	echo "${msg}"
     fi 
     
     echo "Errors are okay: this is a denial test"
@@ -140,11 +156,13 @@ function tests_53_to_65() {
     nova_attachedTo STATUS $VOL_BAD_NAME "$USER2_PARAM"
     if [ "$STATUS" == "$INST_KVM_NAME" ];
     then
-	echo "FAILED: Volume actually attached (test56): $STATUS"
+	msg="FAILED: Volume actually attached (test56): $STATUS"
     else
-	echo "PASSED test 56: attachment of unauthorized volume failed: $STATUS"
+	msg="PASSED test 56: attachment of unauthorized volume failed: $STATUS"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
     # Clean up: kill the volume, also test 64
     # 64 nova user: delete a volume : nova volume-delete <volume-id>, Check with nova volume-list
     nova $USER2_PARAM volume-delete $VOL_BAD_NAME
@@ -152,10 +170,12 @@ function tests_53_to_65() {
     STATUS=`nova $USER2_PARAM volume-list | grep $VOL_BAD_NAME`
     if [ "$STATUS" == "" ];
     then
-	echo "PASSED Test 64: volume deletion"
+	msg="PASSED Test 64: volume deletion"
     else
-	echo "FAILED Test 64: volume delete: $STATUS"
+	msg="FAILED Test 64: volume delete: $STATUS"
     fi
+    echo "${msg}"
+    write_log "${msg}" "${log}"
 
 
     ########################################################################################################
@@ -166,21 +186,25 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" == "in-use" ];
     then
-	echo "Volume reattach (test57 kvm) succeeded"
+	msg="Volume reattach (test57 kvm) succeeded"
     else
-	echo "Volume reattach (test57 kvm) failed. Volume status is $STATUS"
+	msg="Volume reattach (test57 kvm) failed. Volume status is $STATUS"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
     ## Check contents
     sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount /dev/vdb /mnt"
     sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
     if [ "$STATUS" == "Hello" ];
     then 
-	echo "PASSED Test 57: Read content from reattached volume"
+	msg="PASSED Test 57: Read content from reattached volume"
     else
-	echo "FAILED Test 57: Reading reattached volume: $STATUS"
+	msg="FAILED Test 57: Reading reattached volume: $STATUS"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
     
     ########################################################################################################
     # 59 nova user: create multiple volumes
@@ -206,10 +230,12 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" == "in-use" ];
     then
-	echo "PASSED test 62/63 (unauthorized volume detach): Volume still attached"
+	msg="PASSED test 62/63 (unauthorized volume detach): Volume still attached"
     else
-	echo "FAILED test 62/63 (unauthorized volume detach): After detachment volume is $STATUS"
+	msg="FAILED test 62/63 (unauthorized volume detach): After detachment volume is $STATUS"
     fi
+    echo "${msg}"
+    write_log "${msg}" "${log}"
 
     ########################################################################################################
     # 65 nova user: delete an unauthorized volume : operation failed 
@@ -220,10 +246,12 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" != "" ];
     then
-	echo "PASSED test 65 (unauthorized volume delete): Volume still there $STATUS"
+	msg="PASSED test 65 (unauthorized volume delete): Volume still there $STATUS"
     else
-	echo "FAILED test 65 (unauthorized volume delete): Volume is gone"
+	msg="FAILED test 65 (unauthorized volume delete): Volume is gone"
     fi
+    echo "${msg}"
+    write_log "${msg}" "${log}"
 
     # Clean up
     nova_detachVolume "$USER1_PARAM" $INST_KVM_NAME $VOL_GOOD_NAME

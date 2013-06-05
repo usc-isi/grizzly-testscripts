@@ -263,7 +263,11 @@ tests_15_to_27 "${LOG_FILE}"
 # JP's tests
 #tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
 
+# TK's tests
+#tests_53_to_65 "${LOG_FILE}"
+
 #tests_66_to_76
 
 
+# Cleanup environment
 cleanup_env
