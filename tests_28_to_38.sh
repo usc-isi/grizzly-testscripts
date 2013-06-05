@@ -10,6 +10,7 @@ function tests_28_to_38() {
     #source openrc-root-cperi
     local log=$1
     local openrc_admin=$2
+    local msg
 
     echo " ============================================================== "
     echo " ================ Starting Tests 28-38 ======================== "
@@ -28,7 +29,7 @@ function tests_28_to_38() {
 
 
     trap "{
-    source openrc-root-cperi;
+    source ${openrc_admin};
     nova image-delete $private_image;
     nova image-delete $public_image;
 }" EXIT
@@ -50,7 +51,9 @@ function tests_28_to_38() {
 
 
     if [ "$euca_describe_images_output" == "" ]; then
-	echo XXXX Test$testNum Failed to create image $public_image
+	msg="XXXX Test$testNum Failed to create image $public_image"
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     else
 
 	while true; do 
@@ -68,9 +71,13 @@ function tests_28_to_38() {
 	echo euca_describe_images_output $euca_describe_images_output
 	
 	if [ "`glance image-show $public_image | grep is_public | grep True`" == "" ]; then
-	    echo XXXX Test$testNum Failed to create public image $public_image
+	    msg="XXXX Test$testNum Failed to create public image $public_image"
+	    echo "${msg}"
+	    write_log "${msg}" "${log}"
 	else
-	    echo == Test$testNum OK
+	    msg="Step#${testNum} Successfully DONE"
+	    echo "${msg}"
+	    write_log "${msg}" "${log}"
 	fi
 	
     fi
@@ -91,7 +98,9 @@ function tests_28_to_38() {
     
 
     if [ "$euca_describe_images_output" == "" ]; then
-	echo XXXX Test$testNum Failed to create image $private_image
+	msg="XXXX Test$testNum Failed to create image $private_image"
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     else
 	
 	while true; do 
@@ -109,15 +118,16 @@ function tests_28_to_38() {
 	echo euca_describe_images_output $euca_describe_images_output
 
 	if [ "`glance image-show $private_image | grep is_public | grep False`" == "" ]; then
-	    echo XXXX Test$testNum Failed to create private image $private_image
+	    msg="XXXX Test$testNum Failed to create private image $private_image"
 	else
-	    echo == Test$testNum OK
+	    msg="Step#${testNum} Successfully DONE"
 	fi
-
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     fi
 
 
-    source openrc-root-cperi
+    source openrc_admin
     
     testNum=34
     echo " "
@@ -136,12 +146,16 @@ function tests_28_to_38() {
 	echo euca_describe_images_output $euca_describe_images_output
 	
 	if [ "`glance image-show $private_image | grep is_public | grep -i True`" ]; then
-	    echo == Test$testNum OK
+	    msg="Step#${testNum} Successfully DONE"
 	else
-	    echo === Failed to change image is_public status
+	    msg="Step# ${testNum} Failed to change image is_public status"
 	fi
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     else
-	echo XXXX Test$testNum Failed because image is already public
+	msg="XXXX Test$testNum Failed because image is already public"
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     fi
 
 
@@ -161,12 +175,16 @@ function tests_28_to_38() {
 	echo euca_describe_images_output $euca_describe_images_output
 	
 	if [ "`glance image-show $public_image | grep is_public | grep -i false`" ]; then
-	    echo == Test$testNum OK
+	    msg="Step#$testNum OK"
 	else
-	    echo XXXX Test$testNum Failed to change image is_public status
+	    msg="Step#${testNum} Failed to change image is_public status"
 	fi
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     else
-	echo XXXX Test$testNum Failed because image is already private
+	msg="Step#${testNum} Failed because image is already private"
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     fi
 
     echo 
@@ -178,10 +196,8 @@ function tests_28_to_38() {
     echo "Step#${$testNum} user: make a public image to private image owned by another user (should fail)"
     echo "---------------------------------------------------------------------------"    
 
-
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
     echo euca_describe_images_output $euca_describe_images_output
-    
     
     source openrc-demo2
     if [ "`glance image-show $private_image | grep is_public | grep -i true`" ]; then 
@@ -192,12 +208,16 @@ function tests_28_to_38() {
 	
 	if [ "`glance image-show $private_image  | grep is_public | grep -i true`" ]; then
 	    echo XXXX Test$testNum did not change image is_public status
-	    echo == Test$testNum OK
+	    msg="Step#${testNum} Successfully DONE"
 	else
-	    echo XXXX Test$testNum FAILED - Changed the image is_public status for image owned by another user
+	    msg="Step#${testNum} FAILED - Changed the image is_public status for image owned by another user"
 	fi
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     else
-	echo XXXX Test$testNum Failed because image is already private
+	msg="Step#$testNum Failed because image is already private"
+	echo "${msg}"
+	write_log "${msg}" "${log}"
     fi
     
 
@@ -208,11 +228,10 @@ function tests_28_to_38() {
     echo "Step#${$testNum} user: delete an image"
     echo "---------------------------------------------------------------------------"
     
-    source openrc-root-cperi
+    source ${openrc_admin}
     
     euca_describe_images_output=$(euca-describe-images | grep $public_image_id)
     echo euca_describe_images_output $euca_describe_images_output
-    
     
     euca-deregister $public_image_id
     if [ $? != 0 ]; then
@@ -223,11 +242,12 @@ function tests_28_to_38() {
     echo euca_describe_images_output $euca_describe_images_output
     
     if [[ $? -eq 0 && -z "`glance image-list | grep $public_image`" ]]; then
-	echo == Test$testNum OK
+	msg="Step#${testNum}Successfully DONE"
     else
-	echo XXXX Test$testNum Failed to delete image $public_image
+	msg="Step#${testNum} Failed to delete image $public_image"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
     
     testNum=38
 
@@ -248,11 +268,13 @@ function tests_28_to_38() {
     echo euca_describe_images_output $euca_describe_images_output
     
     if [ -z "`glance image-list | grep $private_image`" ]; then
-	echo XXXX Test$testNum Failed, should not be able to delete $private_image
+        msg="Step#${testNum} Failed, should not be able to delete $private_image"
     else
-	echo == Test$testNum OK
+	msg="Step#${testNum} OK"
     fi
-    
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+
     # clean up
     echo 
     echo 
