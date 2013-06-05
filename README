@@ -19,3 +19,31 @@ This script relies on image files that can be found on bespin105:/home/musleh/te
 - ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz
 
 Additional images are necessary for several of the subscripts (update README as testing proceeds)
+
+
+#### Running
+
+# Options:
+
+-h (hypervisor LXC or KVM, default KVM)                                                                               
+-f (flavor, default m1.tiny)                                                                                          
+-i (image, default kvm_fs)                                                                                            
+-r (openrc_root full path, default /root/openrc)                                                                      
+-p (path to openrc-demo1/2, default /root/jp_scripts/)                                                                
+-l (log file for test outputs (Pass/Fail)                                                                             
+-m (the Member role, default Member)                                                                                  
+-n (network, default public)                                                                                          
+-u (user, default root)                                                                                               
+-S (Start Test Number)                                                                                                
+-E (End Test Number)                                                                                                  
+                                                                                                                      
+e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova    
+                                                                                                                      
+e.g. clear; bash regression-test.sh -r /root/openrc -l log.txt    
+
+
+# Default run all tests
+  $ bash regression-test.sh -l log.txt -r /root/openrc
+
+# Run set of test-cases: e.g. 7-14
+  $ bash regression-test.sh -l log.txt -r /root/openrc -S 7 -E 14
