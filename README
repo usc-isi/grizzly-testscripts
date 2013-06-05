@@ -9,3 +9,13 @@
 #                                                                                                               
 # Documentation for running hpc-grizzly test-scripts
 
+Images:
+
+This script relies on image files that can be found on bespin105:/home/musleh/test-scripts/
+
+- ttylinux-uec-amd64-12.1_2.6.35-22_1.img
+- ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd
+- ttylinux-uec-amd64-12.1_2.6.35-22_1-loader
+- ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz
+
+Additional images are necessary for several of the subscripts (update README as testing proceeds)
