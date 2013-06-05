@@ -24,6 +24,7 @@ source tests_66_to_76.sh
 declare LOG_FILE
 declare USER
 
+declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
 
@@ -59,6 +60,8 @@ function verify_test() {
 LOG_FILE: ${LOG_FILE}
 USER: ${USER}
 OPENRC_ROOT: ${OPENRC_ROOT}
+START_TEST: ${START_TEST_NUM}
+END_TEST: ${END_TEST_NUM}
 CONFIG
 
 INSTALLMSG="TEST Scripts will run with the above parameters \n
@@ -80,6 +83,7 @@ fi
 }
 
 
+# Function to process command line options
 function do_get_options(){
 
     echo "Processing Command Line Parameters..."
@@ -115,6 +119,7 @@ function do_get_options(){
                 ;;
 	    S)
 		START_TEST_NUM=${OPTARG}
+		TEST_NUM=${START_TEST_NUM}
 		;;
 	    E)
 		END_TEST_NUM=${OPTARG}
@@ -252,22 +257,57 @@ verify_test
 init_env
 
 # Mikyung's tests
-tests_7_to_14 "${LOG_FILE}"
+if [ "${TEST_NUM}" -lt "7" ]
+then
+    tests_7_to_14 "${LOG_FILE}"
+    TEST_NUM=15
+else
+    echo "Skipping Tests:7-14"
+fi
 
 # Malek's tests
-tests_15_to_27 "${LOG_FILE}"
+if [ "${TEST_NUM}" -gt "14" ] && [ "${TEST_NUM}" -lt "27" ]
+then
+    tests_15_to_27 "${LOG_FILE}"
+    TEST_NUM=28
+else
+    echo "Skipping Tests:15-27"
+fi
 
 # Charles tests
-#tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}"
+if [ "${TEST_NUM}" -gt "27" ] && [ "${TEST_NUM}" -lt "38" ]
+then
+    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}"
+    TEST_NUM=39
+else
+    echo "Skipping Tests:28-38"
+fi
 
 # JP's tests
-#tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
+if [ "${TEST_NUM}" -gt "38" ] && [ "${TEST_NUM}" -lt "52" ]
+then
+    tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
+    TEST_NUM=53
+else
+    echo "Skipping Tests: 39-52"
+fi
 
 # TK's tests
-#tests_53_to_65 "${LOG_FILE}"
+if [ "${TEST_NUM}" -gt "52" ] && [ "${TEST_NUM}" -lt "65" ]
+then
+    tests_53_to_65 "${LOG_FILE}"
+    TEST_NUM=66
+else
+    echo "Skipping Tests: 53-65"
+fi
 
-#tests_66_to_76 "${LOG_FILE}"
-
+# Ke-thia's tests
+if [ "${TEST_NUM}" -gt "65" ] && [ "${TEST_NUM}" -lt "76" ]
+then
+    tests_66_to_76 "${LOG_FILE}"
+else
+    echo "Skipping Tests:66-76"
+fi
 
 # Cleanup environment
 cleanup_env
