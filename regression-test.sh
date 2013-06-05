@@ -233,8 +233,8 @@ function init_env() {
 function cleanup_env() {
 
     echo "Cleanup_env ------"
-    clean_glance_repo "openrc_demo1"
-    clean_glance_repo "openrc_demo2"
+    clean_glance_repo "openrc-demo1"
+    clean_glance_repo "openrc-demo2"
     
 }
 
@@ -257,7 +257,7 @@ verify_test
 init_env
 
 # Mikyung's tests
-if [ "${TEST_NUM}" -lt "7" ]
+if [[ ${TEST_NUM} -lt "7" ]]
 then
     tests_7_to_14 "${LOG_FILE}"
     TEST_NUM=15
@@ -266,7 +266,7 @@ else
 fi
 
 # Malek's tests
-if [ "${TEST_NUM}" -gt "14" ] && [ "${TEST_NUM}" -lt "27" ]
+if [[ ${TEST_NUM} -gt "14" ][ && [[ ${TEST_NUM} -lt "27" ]]
 then
     tests_15_to_27 "${LOG_FILE}"
     TEST_NUM=28
@@ -275,7 +275,7 @@ else
 fi
 
 # Charles tests
-if [ "${TEST_NUM}" -gt "27" ] && [ "${TEST_NUM}" -lt "38" ]
+if [[ ${TEST_NUM} -gt "27" ]] && [[ ${TEST_NUM} -lt "38" ]]
 then
     tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}"
     TEST_NUM=39
@@ -284,7 +284,7 @@ else
 fi
 
 # JP's tests
-if [ "${TEST_NUM}" -gt "38" ] && [ "${TEST_NUM}" -lt "52" ]
+if [[ ${TEST_NUM} -gt "38" ]] && [[ ${TEST_NUM} -lt "52" ]]
 then
     tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
     TEST_NUM=53
@@ -293,7 +293,7 @@ else
 fi
 
 # TK's tests
-if [ "${TEST_NUM}" -gt "52" ] && [ "${TEST_NUM}" -lt "65" ]
+if [[ ${TEST_NUM} -gt "52" ]] && [[ ${TEST_NUM} -lt "65" ]]
 then
     tests_53_to_65 "${LOG_FILE}"
     TEST_NUM=66
@@ -302,7 +302,7 @@ else
 fi
 
 # Ke-thia's tests
-if [ "${TEST_NUM}" -gt "65" ] && [ "${TEST_NUM}" -lt "76" ]
+if [[ ${TEST_NUM} -gt "65" ]] && [[ ${TEST_NUM} -lt "76" ]]
 then
     tests_66_to_76 "${LOG_FILE}"
 else
