@@ -179,11 +179,32 @@ function do_create_keypair(){
 
 }
 
+# Test if the named environment variable is set and not zero length                                              
+# is_set env-var                                                                                                  
+function is_set() {
+    local var=\$"$1"
+    eval "[ -n \"$var\" ]" # For ex.: sh -c "[ -n \"$var\" ]" would be better, but several exercises depends on this
+}
+
 function do_delete_keypair(){
         source $1
         nova keypair-delete $2
         rm -rf $2 $2.pub
         return 0
+}
+
+function euca_delete_keypair() {
+    local rc=$1
+    local name=$2
+    local test
+
+    echo "Deleting keypair: ${name} using credentials file: ${rc}"
+
+    source $rc
+    test=`euca-describe-keypairs | grep ${name} | awk '{ print $2 }' | head -n 1`
+    echo "Deleting KeyPair: ${test}"
+    
+    euca-delete-keypair "${test}"
 }
 
 function sendSshAndGet {

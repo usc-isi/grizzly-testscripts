@@ -155,6 +155,10 @@ function init_env() {
     
     remove_known_hosts
 
+    # Clean up environment prior to new initialization
+    cleanup_env
+
+    # Start log activity for Tests Pass/Fail
     start_log "${LOG_FILE}"
 
     keystone tenant-create --name demo_tenant1
@@ -235,6 +239,9 @@ function cleanup_env() {
     echo "Cleanup_env ------"
     clean_glance_repo "openrc-demo1"
     clean_glance_repo "openrc-demo2"
+
+    euca_delete_keypair "openrc-demo1" "demo1"
+    euca_delete_keypair "openrc-demo2" "demo2"
     
 }
 
