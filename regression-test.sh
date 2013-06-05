@@ -266,7 +266,7 @@ tests_15_to_27 "${LOG_FILE}"
 # TK's tests
 #tests_53_to_65 "${LOG_FILE}"
 
-#tests_66_to_76
+#tests_66_to_76 "${LOG_FILE}"
 
 
 # Cleanup environment
