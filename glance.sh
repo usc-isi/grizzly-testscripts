@@ -14,8 +14,12 @@
 
 
 
+# Function to clear all images and meta-deta from glance repository
 clean_glance_repo() {
 
-    echo "Cleaning all images and meta-data from glance repository"
+    local cred_file=$1
+    source $cred_file
+
+    echo "Cleaning all images and meta-data from glance repository using credentials file: ${cred_file}"
     glance clear
 }

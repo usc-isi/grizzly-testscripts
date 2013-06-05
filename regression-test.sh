@@ -228,8 +228,8 @@ function init_env() {
 function cleanup_env() {
 
     echo "Cleanup_env ------"
-    clean_glance_repo
-
+    clean_glance_repo "openrc_demo1"
+    clean_glance_repo "openrc_demo2"
     
 }
 
