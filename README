@@ -51,3 +51,15 @@ bash regression-test.sh -l log.txt -r /root/openrc -p . -h kvm
 
 # Run set of test-cases: e.g. 7-14
   $ bash regression-test.sh -l log.txt -r /root/openrc -S 7 -E 14
+
+
+
+############## Other Functions ###############
+
+- delete all volumes:
+
+$ source volume.sh; delete_all_volumes;
+
+- delete all images/meta data from glance repo:
+
+$ source glance.sh; clean_glance_repo "openrc-file"

@@ -255,6 +255,9 @@ function cleanup_env() {
     clean_glance_repo "${OPENRC_DEMO1}"
     clean_glance_repo "${OPENRC_DEMO2}"
 
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
+
     euca_delete_keypair "openrc-demo1" "demo1"
     euca_delete_keypair "openrc-demo2" "demo2"
     

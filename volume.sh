@@ -92,14 +92,13 @@ function delete_volume() {
     sleep 30
 }
 
-# Wrapper to cycle through and call delete_volume
+# Call external script to delete all volumes
 function delete_all_volumes() {
-
-    echo "delete_all_volumes"
-
+    local cred_file=$1
+    source $cred_file
+    echo "Deleting all Volumes using credential file: ${cred_file}"
+    python euca-volume-delete-all
 }
-
-
 
 ##### NOVA VOLUME RELATED FUNCTIONS ######
 

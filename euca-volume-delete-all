@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+#===============================================================================
+# This script deletes all volumes created by EC2/Euca
+#
+# Author: Mike Metral
+# Date: Feb. 8, 2010
+#-------------------------------------------------------------------------------
+import subprocess as sp
+import os
+#-------------------------------------------------------------------------------
+def delete_all_volumes():
+    # Retrieve all info about the instances
+    get_all_volumes = sp.Popen(["euca-describe-volumes"], stdout = sp.PIPE)
+
+    # Grep for the lines in the info that contain the word 'VOLUME'
+    grep_instance = sp.Popen(["grep", "VOLUME"], 
+        stdin = get_all_volumes.stdout, stdout = sp.PIPE)
+
+    # From the retrieved lines, get the volume_id from column 2
+    awk_volume_ids = sp.Popen(["awk", "{print $2}"], 
+        stdin = grep_instance.stdout, stdout = sp.PIPE)
+    all_volume_ids = awk_volume_ids.communicate()[0]
+
+    # Remove the new line characters to get a continuous set of instance_id's
+    formatted_volume_ids = all_volume_ids.split("\n")
+    formatted_volume_ids.pop()
+
+    # Delete the volumes by volume_id
+    print "Deleting volume(s):"
+    for volume_id in formatted_volume_ids:
+        os.system("euca-delete-volume " + volume_id)
+#-------------------------------------------------------------------------------
+def main():
+    delete_all_volumes()
+#-------------------------------------------------------------------------------
+if __name__ == "__main__":
+    main()
+#===============================================================================
