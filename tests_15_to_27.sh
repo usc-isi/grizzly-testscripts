@@ -184,7 +184,7 @@ function tests_15_to_27() {
 	    source ${openrc}
 	    testNum=19
 	    msg="Detach and re-attach volume with added contents to verify contents persistent"
-	    $(print_test_msg "${testNum}" "${msg}")
+	    print_test_msg "${testNum}" "${msg}"
 	    $(detach_volume "${volume}")
 	    sleep 30;
 	    
@@ -234,7 +234,7 @@ function tests_15_to_27() {
 	    if [ $j == $TENANT2 ]; then
 		testNum=17
 		msg="Attach a volume to an unauthorized instance"
-		$(print_test_msg "${testNum}" "${msg}")
+		print_test_msg "${testNum}" "${msg}"
 		
 	            # First detach if volume is attached
 		attached=$(volume_attached "${volume}")
@@ -251,7 +251,7 @@ function tests_15_to_27() {
 		
 		msg="Checking to make sure volume not attached to unauthorized instance"
 		command=" euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		attached=$(volume_attached "${volume}")
 		status=$(volume_status "${volume}")
 		state=$(volume_state "${volume}")
@@ -273,13 +273,13 @@ function tests_15_to_27() {
 		testNum=18
 		msg="Attach an unauthorized volume to an instance"
 		command="euca-attach-volume ${OTHER_VOLUME} -i ${INST_ID} -d /dev/vdc"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-attach-volume ${OTHER_VOLUME} -i ${INST_ID} -d /dev/vdc`
 		sleep 30
 		
 		msg=" Checking to make sure unauthorized volume not attached to instance"
 		command=" euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		attached=$(volume_attached "${volume}")
 		status=$(volume_status "${volume}")
 		state=$(volume_state "${volume}")
@@ -301,13 +301,13 @@ function tests_15_to_27() {
 	    if [ $j == $TENANT2 ]; then
 		testNum=22
 		msg="euca-detach-volume ${volume} "
-		$(print_test_msg "${testNum}" "${msg}")
+		print_test_msg "${testNum}" "${msg}"
 		RET=`euca-detach-volume ${volume}`
 		sleep 30    
 		    
 		msg=" Checking to make sure attached volumes are de-attached"
 		command=" euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		available=$(volume_attached "${volume}")
 		status=$(volume_status "${volume}")
 		state=$(volume_state "${volume}")
@@ -327,13 +327,13 @@ function tests_15_to_27() {
 		testNum=23
 		msg=" Testing reattachment"
 		command="euca-attach-volume ${volume} "
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdc`
 		sleep 30
 		
 		msg=" Checking to make sure attached volumes are attached"
 		command=" euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-describe-volumes`
 		status=`echo $RET | awk '{ print $11}'`
 		volume=`echo $RET | awk '{ print $2}'`
@@ -365,7 +365,7 @@ function tests_15_to_27() {
 		
 		msg=" Checking to make sure volume was not attached"
 		command=" euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		
 		available=$(volume_attached "${volume}")
 		status=$(volume_status "${volume}")
@@ -386,12 +386,12 @@ function tests_15_to_27() {
 		testNum=25
 		msg=" detach volume from an unauthorized instance \n Try to detach ${TENANT1} VOLUME: ${OTHER_VOLUME} from Instance: ${OTHER_INST}"
 		command="euca-detach-volume ${OTHER_VOLUME}"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-detach-volume ${OTHER_VOLUME}`
 		
 		msg="Checking to make sure volume: ${OTHER_VOLUME} was not de-attached"
 		command="euca-describe-volumes"
-		$(print_test_command_msg "${testNum}" "${msg}" "${command}")
+		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		
 		available=$(volume_attached "${volume}")
 		status=$(volume_status "${volume}")
