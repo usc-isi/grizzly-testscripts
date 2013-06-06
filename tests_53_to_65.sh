@@ -3,9 +3,8 @@
 
 source functions.sh
 source volume.sh
+source glance.sh
 
-# kvm-fs kvm_fs or whatever works
-KVM_IMAGE=kvm_fs
 KVM_FLAVOR=1
 INST_KVM_NAME=test54
 INST_BAD_NAME=test55
@@ -24,10 +23,12 @@ VOL_BAD_NAME=test56
 function tests_53_to_65() {
 
     local log=$1
+    local IMAGE=$2
+    local HYPERVISOR=$3
     local msg
 
     echo " ============================================================== "
-    echo " ================ Starting Tests 53-65  ======================== "
+    echo " =============== Starting Tests 53-65  ======================== "
     echo " ============================================================== "
 
 ########################################################################################################
@@ -36,7 +37,6 @@ function tests_53_to_65() {
 
 # 53 nova user: create a volume 
 # : nova volume-create --display_name <volume_name> <size_in_GB>, Check with nova volume-list
-
 
 
     STATUS=""
@@ -59,7 +59,7 @@ function tests_53_to_65() {
 # for lxc- volume auto-mounted at /vmnt
 
     makeAddKey $KEY_PAIR $KEY_FILE "$USER1_PARAM"
-    nova_bootInstance "$USER1_PARAM" $INST_KVM_NAME $KVM_FLAVOR $KVM_IMAGE "--key-name $KEY_PAIR"
+    nova_bootInstance "$USER1_PARAM" $INST_KVM_NAME $KVM_FLAVOR $IMAGE "--key-name $KEY_PAIR"
     KVM_IP=`nova $USER1_PARAM list | grep $INST_KVM_NAME | awk '{ print \$8 }' | sed 's/public=//'`
     
     echo "Got IP for KVM $KVM_IP"
@@ -76,30 +76,32 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     echo "Status of volume after attaching: $STATUS"
     
-    
-    ## KVM part: make ext3 fs partition and format it
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls /dev/vdb"
-    echo "Looking for /dev/vdb after attaching: $STATUS"
-    
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 /dev/vdb"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount /dev/vdb /mnt"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
-    
-    if [ "$STATUS" == "Hello" ];
+    if [ "${HYPERVISOR}" == "kvm" ]
     then
-	msg="PASSED Test 54: Format, write and read back"
+      ## KVM part: make ext3 fs partition and format it
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls /dev/vdb"
+	echo "Looking for /dev/vdb after attaching: $STATUS"
+    
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 /dev/vdb"
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount /dev/vdb /mnt"
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt"
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
+    
+	if [ "$STATUS" == "Hello" ];
+	then
+	    msg="PASSED Test 54: Format, write and read back"
+	else
+	    msg="FAILED Test 54: Read back $STATUS"
+	fi
+	echo "${msg}"
+	write_log "${msg}" "${log}"
+
+	sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
+
     else
-	msg="FAILED Test 54: Read back $STATUS"
+	echo "LXC PART TODO"
+	exit 1
     fi
-    echo "${msg}"
-    write_log "${msg}" "${log}"
-
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
-
-
-    ## LXC part
-    ## TODO
 
     # Undo volume attach. Also works as test 60
     # 60 nova user: detach a volume 
@@ -119,7 +121,7 @@ function tests_53_to_65() {
     # 55 nova user: attach a volume to an unauthorized instance 
     # : tried to attach a volume to an instance created by a different user in a different tenant - failed
 
-    nova_bootInstance "$USER2_PARAM" $INST_BAD_NAME $KVM_FLAVOR $KVM_IMAGE ""
+    nova_bootInstance "$USER2_PARAM" $INST_BAD_NAME $KVM_FLAVOR $IMAGE ""
     
     echo "Errors are okay: this is a denial test"
     nova_attachVolume "$USER1_PARAM" $INST_BAD_NAME $VOL_GOOD_NAME $DEV_NAME
@@ -255,10 +257,10 @@ function tests_53_to_65() {
 
     # Clean up
     nova_detachVolume "$USER1_PARAM" $INST_KVM_NAME $VOL_GOOD_NAME
-    nova $USER1_PARAM volume-delete $VOL_GOOD_NAME
-    nova $USER1_PARAM delete $INST_KVM_NAME
-    nova $USER1_PARAM keypair-delete $KEY_PAIR
-    rm -f $KEY_FILE
-    rm -f "$KEY_FILE.pub"
+    delete_all_volumes # no openrc file here?
+
+    #nova $USER1_PARAM keypair-delete $KEY_PAIR
+    #rm -f $KEY_FILE
+    #rm -f "$KEY_FILE.pub"
 
 }

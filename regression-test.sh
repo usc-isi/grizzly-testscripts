@@ -338,7 +338,7 @@ then
     echo "Cleanup before next Set of Tests"
     cleanup_env
  
-    tests_53_to_65 "${LOG_FILE}"
+    tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}"
     TEST_NUM=66
 else
     echo "Skipping Tests: 53-65"
