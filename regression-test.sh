@@ -290,7 +290,7 @@ fi
 # Malek's tests
 if [[ ${TEST_NUM} -gt "14" ][ && [[ ${TEST_NUM} -lt "27" ]]
 then
-    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}"
+    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}"
     TEST_NUM=28
 else
     echo "Skipping Tests:15-27"

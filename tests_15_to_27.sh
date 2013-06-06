@@ -6,6 +6,8 @@ source volume.sh
 function tests_15_to_27() {
 
     local log=$1
+    local openrc_path=$2
+    local LIBVIRT_TYPE=$3
     local msg
     
     TENANT1=demo1
@@ -33,7 +35,6 @@ function tests_15_to_27() {
     declare i=0
     declare j=0
 
-    declare -a LIBVIRT="kvm" 
     declare -a TENANT=("${TENANT1}" "${TENANT2}")
 
 
@@ -41,38 +42,41 @@ function tests_15_to_27() {
     echo " ================ Starting Tests 15-27 ======================== "
     echo " ============================================================== "
 
-    for i in $LIBVIRT; do
+    if [ "$LIBVIRT_TYPE" = "kvm" ]; then
+	INST_TYPE=m1.tiny
+	USER=root
+    elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
+	INST_TYPE=m1.tiny
+	USER=nova
+    else
+	echo "ERROR: Unknown LIBVIRTTYPE: $LIBVIRT_TYPE"
+        exit 1
+    fi
+	
+    for j in $TENANT; do
+	
+	echo " "
+	echo "[$i] $j TESTING ============================================================="
 
-	LIBVIRT_TYPE=$i
+        openrc="${openrc_path}openrc-$j"
+	echo "Sourcing openrc file: ${openrc} for TENANT: $j"
+        source ${openrc}
+
 	if [ "$LIBVIRT_TYPE" = "kvm" ]; then
-	    INST_TYPE=m1.tiny
-	    USER=root
+	    IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
 	elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
-	    INST_TYPE=m1.tiny
-	    USER=nova
+	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }'`
 	fi
 	
-	for j in $TENANT; do
-      
-	    echo " "
-	    echo "[$i] $j TESTING ============================================================="
-	    source ./openrc-$j
-
-	    if [ "$LIBVIRT_TYPE" = "kvm" ]; then
-		IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
-	    elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
-		IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }'`
+	if [ "$IMG_NAME" ]; then
+	    
+	    KEY_NAME=keypair-$j
+	    KEY=$KEY_NAME.pem
+	    KEY_EXIST=`euca-describe-keypairs | grep $KEY_NAME | awk '{ print $2 }'`
+	    if [ "$KEY_EXIST" != "$KEY_NAME" ]; then
+		euca-add-keypair $KEY_NAME > ${openrc_path}$KEY
+		chmod 600 ${openrc_path}$KEY
 	    fi
-
-	    if [ "$IMG_NAME" ]; then
-
-		KEY_NAME=keypair-$j
-		KEY=$KEY_NAME.pem
-		KEY_EXIST=`euca-describe-keypairs | grep $KEY_NAME | awk '{ print $2 }'`
-		if [ "$KEY_EXIST" != "$KEY_NAME" ]; then
-		    euca-add-keypair $KEY_NAME > ./$KEY
-		    chmod 600 $KEY
-		fi
 
 		echo " "
 		echo "---------------------------------------------------------------------------"
@@ -161,16 +165,17 @@ function tests_15_to_27() {
 		else
 
 		    echo "VOLUME: ${volume} attached, now ssh to add contents..."
-		    echo " Step8. ssh -i $KEY $USER@$INST_IP"
+		    echo " Step8. ssh -i ${openrc_path}$KEY $USER@$INST_IP"
 		    COMMAND=`echo "${CONTENTS}" >& $FILE`
-		    ssh -i $KEY $USER@$INST_IP 'echo "Hello from Malek" >& hello.txt; ls; cat hello.txt'
+		    ssh -i ${openrc_path}$KEY $USER@$INST_IP 'echo "Hello from Malek" >& hello.txt; ls; cat hello.txt'
 		    msg=" =====> Step#16. is successfully DONE."
 		    echo "${msg}"
                     write_log "${msg}" "${log}"
 		fi
 		
                 # Now detach volume new file was added to, and then re-attach and verify file exists
-		source ./openrc-$j
+#		source ./openrc-$j
+		source ${openrc}
 		testNum=19
 		msg="Detach and re-attach volume with added contents to verify contents persistent"
 		$(print_test_msg "${testNum}" "${msg}")
@@ -199,7 +204,7 @@ function tests_15_to_27() {
 		if [ "${attached}" == "true" ]
 		then
 		    echo "Verifying if File: $FILE Exists"
-		    ssh -i $KEY $USER@$INST_IP '
+		    ssh -i ${openrc_path}$KEY $USER@$INST_IP '
 	  if [ ! -e "hello.txt" ]
 	  then
 	      msg="Step 19. Failed. FILE DOES NOT EXIST!"
@@ -219,7 +224,6 @@ function tests_15_to_27() {
 		    echo "Re-attachment of content verification volume failed"
 		    exit 1
 		fi
-		
 
 		if [ $j == $TENANT2 ]; then
 		    testNum=17
@@ -474,7 +478,7 @@ function tests_15_to_27() {
 	    euca-delete-keypair $KEY_NAME
 	    echo " KEY DELETED "
 	    echo "Remaining key and instance of $TENANT1 is DELETED: "
-	    source ./openrc-$TENANT1
+	    source "${openrc_path}openrc-$TENANT1"
 	    euca-terminate-instances $OTHER_INST_ID
 	    euca-delete-keypair $OTHER_KEY_NAME
 	    echo " KEY DELETED "
