@@ -63,9 +63,13 @@ function tests_15_to_27() {
         source ${openrc}
 	
 	if [ "$LIBVIRT_TYPE" = "kvm" ]; then
-	    IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
+	    # exclude string with 'lxc'
+	    IMG_NAME=`euca-describe-images | grep -nr "fs" | grep -v "lxc" | awk '{ print $2}'`
+	    #IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
 	elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
 	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }'`
+	else
+	    echo "ERROR: Unknown LIBVIRT_TYPE: ${LIBVIRT_TYPE}"
 	fi
 	
 	if [ "$IMG_NAME" ]; then
