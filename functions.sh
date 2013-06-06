@@ -207,6 +207,16 @@ function euca_delete_keypair() {
     euca-delete-keypair "${test}"
 }
 
+function delete_all_instances() {
+
+    local cred_file=$1
+    source $cred_file
+
+    echo "Terminating all euca instances using credentials file: ${cred_file}"
+    euca-terminate-instances $(euca-describe-instances |grep i-|cut -f 2)
+}
+
+
 function sendSshAndGet {
   # $1 - result to be returned
   local keyfile=$2

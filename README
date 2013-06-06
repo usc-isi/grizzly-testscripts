@@ -58,8 +58,12 @@ bash regression-test.sh -l log.txt -r /root/openrc -p . -h kvm
 
 - delete all volumes:
 
-$ source volume.sh; delete_all_volumes;
+$ source volume.sh; delete_all_volumes "${OPENRC_DEMO1}"
 
 - delete all images/meta data from glance repo:
 
-$ source glance.sh; clean_glance_repo "openrc-file"
+$ source glance.sh; clean_glance_repo "${OPENRC_DEMO1}"
+
+- terminate all euca instances
+
+$ source functions.sh; delete_all_instances "${OPENRC_DEMO1}"

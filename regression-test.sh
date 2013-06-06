@@ -249,9 +249,16 @@ function init_env() {
 }
 
 
+# Function to do full clean
 function cleanup_env() {
 
-    echo "Cleanup_env ------"
+    echo "======================================================"
+    echo "------ Cleaning Up All Instances/Images/Volumes ------"
+    echo "======================================================"
+
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+
     clean_glance_repo "${OPENRC_DEMO1}"
     clean_glance_repo "${OPENRC_DEMO2}"
 
@@ -261,6 +268,7 @@ function cleanup_env() {
     euca_delete_keypair "openrc-demo1" "demo1"
     euca_delete_keypair "openrc-demo2" "demo2"
     
+    echo "Cleanup DONE!"
 }
 
 
