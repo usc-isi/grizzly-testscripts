@@ -7,6 +7,8 @@ source volume.sh
 function tests_7_to_14() {
 
     local log=$1
+    local openrc_path=$2
+    local openrc
     local msg
     local msg2
 
@@ -44,7 +46,10 @@ $TENANT2
 	    
 	    echo " "
 	    echo "[$i] $j TESTING ============================================================="
-	    source ./openrc-$j
+	    openrc="${openrc_path}openrc-$j"
+
+	    echo "Sourcing openrc file: ${openrc} for TENANT: $j"
+	    source ${openrc}
 	    
 	    if [ "$LIBVIRT_TYPE" = "kvm" ]; then
 		IMG_NAME=`euca-describe-images | grep $j | grep fs | grep -v lxc | grep ami | awk '{ print $2 }' | head -n 1`

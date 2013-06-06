@@ -23,6 +23,9 @@ source tests_66_to_76.sh
 
 declare LOG_FILE
 declare USER
+declare OPENRC_PATH=./
+declare OPENRC_DEMO1=openrc-demo1
+declare OPENRC_DEMO2=openrc-demo2
 
 declare TEST_NUM
 declare START_TEST_NUM=0
@@ -60,6 +63,9 @@ function verify_test() {
 LOG_FILE: ${LOG_FILE}
 USER: ${USER}
 OPENRC_ROOT: ${OPENRC_ROOT}
+OPENRC_DEMO1: ${OPENRC_DEMO1}
+OPENRC_DEMO2: ${OPENRC_DEMO2}
+
 START_TEST: ${START_TEST_NUM}
 END_TEST: ${END_TEST_NUM}
 CONFIG
@@ -111,6 +117,7 @@ function do_get_options(){
 		LOG_FILE=${OPTARG}
 		;;
 	    p)
+		OPENRC_PATH=${OPTARG}
                 OPENRC_DEMO1=$OPTARG/openrc-demo1
 		OPENRC_DEMO2=$OPTARG/openrc-demo2
 		;;
@@ -183,29 +190,35 @@ function init_env() {
     echo "access2 = $ACCESS2"
     echo "secrete2 = $SECRET2"
     
-    echo "writing generating openrc-demo1"
-    echo "export OS_USERNAME=demo1" > openrc-demo1
-    echo "export OS_PASSWORD=demo1_secrete" >> openrc-demo1
-    echo "export OS_TENANT_NAME=demo_tenant1" >> openrc-demo1
-    echo "export OS_AUTH_URL=http://127.0.0.1:5000/v2.0/" >> openrc-demo1
-    echo "export EC2_ACCESS_KEY=$ACCESS1" >> openrc-demo1
-    echo "export EC2_SECRET_KEY=$SECRET1" >> openrc-demo1
-    echo "export EC2_URL=http://127.0.0.1:8773/services/Cloud" >> openrc-demo1
-    echo "export S3_URL=http://127.0.0.1:3333" >> openrc-demo1
-    echo "export EC2_USER_ID=42" >> openrc-demo1
+    echo "Deleting old file: ${OPENRC_DEMO1} before generating new credentials"
+    rm ${OPENRC_DEMO1}
 
-    echo "writing generating openrc-demo2"
-    echo "export OS_USERNAME=demo2" > openrc-demo2
-    echo "export OS_PASSWORD=demo2_secrete" >> openrc-demo2
-    echo "export OS_TENANT_NAME=demo_tenant2" >> openrc-demo2
-    echo "export OS_AUTH_URL=http://127.0.0.1:5000/v2.0/" >> openrc-demo2
-    echo "export EC2_ACCESS_KEY=$ACCESS2" >> openrc-demo2
-    echo "export EC2_SECRET_KEY=$SECRET2" >> openrc-demo2
-    echo "export EC2_URL=http://127.0.0.1:8773/services/Cloud" >> openrc-demo2
-    echo "export S3_URL=http://127.0.0.1:3333" >> openrc-demo2
-    echo "export EC2_USER_ID=42" >> openrc-demo2
+    echo "writing generating ${OPENRC_DEMO1}"
+    echo "export OS_USERNAME=demo1" > ${OPENRC_DEMO1}
+    echo "export OS_PASSWORD=demo1_secrete" >> ${OPENRC_DEMO1}
+    echo "export OS_TENANT_NAME=demo_tenant1" >> ${OPENRC_DEMO1}
+    echo "export OS_AUTH_URL=http://127.0.0.1:5000/v2.0/" >> ${OPENRC_DEMO1}
+    echo "export EC2_ACCESS_KEY=$ACCESS1" >> ${OPENRC_DEMO1}
+    echo "export EC2_SECRET_KEY=$SECRET1" >> ${OPENRC_DEMO1}
+    echo "export EC2_URL=http://127.0.0.1:8773/services/Cloud" >> ${OPENRC_DEMO1}
+    echo "export S3_URL=http://127.0.0.1:3333" >> ${OPENRC_DEMO1}
+    echo "export EC2_USER_ID=42" >> ${OPENRC_DEMO1}
+
+    echo "Deleting old file: ${OPENRC_DEMO2} before generating new credentials"
+    rm ${OPENRC_DEMO2}
+
+    echo "writing generating ${OPENRC_DEMO2}"
+    echo "export OS_USERNAME=demo2" > ${OPENRC_DEMO2}
+    echo "export OS_PASSWORD=demo2_secrete" >> ${OPENRC_DEMO2}
+    echo "export OS_TENANT_NAME=demo_tenant2" >> ${OPENRC_DEMO2}
+    echo "export OS_AUTH_URL=http://127.0.0.1:5000/v2.0/" >> ${OPENRC_DEMO2}
+    echo "export EC2_ACCESS_KEY=$ACCESS2" >> ${OPENRC_DEMO2}
+    echo "export EC2_SECRET_KEY=$SECRET2" >> ${OPENRC_DEMO2}
+    echo "export EC2_URL=http://127.0.0.1:8773/services/Cloud" >> ${OPENRC_DEMO2}
+    echo "export S3_URL=http://127.0.0.1:3333" >> ${OPENRC_DEMO2}
+    echo "export EC2_USER_ID=42" >> ${OPENRC_DEMO2}
     
-    source ./openrc-demo1
+    source ${OPENRC_DEMO1}
     echo "add KVM image to glance for demo1"
     DEMO1_KERNEL=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
     DEMO1_INITRD=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_initrd" is_public=false container_format=ari disk_format=ari < ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd | awk '{ print $6 } '`
@@ -218,7 +231,7 @@ function init_env() {
     nova volume-create --display-name "demo1" 1
     
 
-    source ./openrc-demo2
+    source ${OPENRC_DEMO2}
     echo "add KVM image to glance for demo2"
     DEMO2_KERNEL=`glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
     
@@ -275,7 +288,7 @@ fi
 # Malek's tests
 if [[ ${TEST_NUM} -gt "14" ][ && [[ ${TEST_NUM} -lt "27" ]]
 then
-    tests_15_to_27 "${LOG_FILE}"
+    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}"
     TEST_NUM=28
 else
     echo "Skipping Tests:15-27"
