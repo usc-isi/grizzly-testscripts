@@ -38,12 +38,12 @@ Additional images are necessary for several of the subscripts (update README as 
 -E (End Test Number)                                                                                                  
                                                                                                                       
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova    
-                                                                                                                      
+
+# Run all tests with admin credentials file:/root/openrc and output to log file: log.txt
 e.g. clear; bash regression-test.sh -r /root/openrc -l log.txt    
 
-
-# Default run all tests
-  $ bash regression-test.sh -l log.txt -r /root/openrc
+# Run all tests with admin credentials file:/root/openrc and output to log file: log.txt using KVM hypervisor
+bash regression-test.sh -l log.txt -r /root/openrc -p ./ -h kvm
 
 # Run set of test-cases: e.g. 7-14
   $ bash regression-test.sh -l log.txt -r /root/openrc -S 7 -E 14
