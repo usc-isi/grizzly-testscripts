@@ -2,6 +2,7 @@
 
 source functions.sh
 source volume.sh
+source glance.sh
 
 declare LOGFILE
 
@@ -9,24 +10,19 @@ declare LOGFILE
 declare KEYNAME=keypair-demo1
 declare KEYNAME_2=keypair-demo2
 declare UNAUTHORIZED_IMAGE=demo2_fs
-declare KVM_IMAGE=kvm_fs
+declare IMAGE=kvm_fs
 declare OPENRC_DEMO2=/root/jp_scripts/openrc-demo2
 declare OPENRC_DEMO1=/root/jp_scripts/openrc-demo1
 declare TIMEOUT=600
 declare FLAVOR=m1.tiny
 
-HOSTS="
-"
 function cleanUp() {
 
-#	nova keypair-delete $KEYNAME
-#	rm -rf $KEYNAME $KEYNAME.pub
-	source /root/openrc
+        local admin_rc=$1
+	source ${admin_rc}
 	keystone user-delete batman
 	keystone tenant-delete gotham
-
 }
-
 
 
 function do_user_stuff(){
@@ -154,6 +150,7 @@ function tests_39_to_52() {
     local admin_rc=$2
     OPENRC_DEMO1=$3
     OPENRC_DEMO2=$4
+    FLAVOR=$5
 
     # expects admin openrc file to be sourced
     echo "Sourcing admin operc file: ${admin_rc}"
@@ -163,7 +160,7 @@ function tests_39_to_52() {
     if [ "$?" -ne "0" ];
     then
 	echo "Something failed in do_user_stuff"
-	cleanUp
+	cleanUp "${admin_rc}"
 	exit 1
 
     fi
@@ -171,7 +168,7 @@ function tests_39_to_52() {
     if [ "$?" -ne "0" ];
     then
         echo "Something failed in do_create_keypair"
-        cleanUp
+        cleanUp "${admin_rc}"
         exit 1
 
     fi
@@ -179,7 +176,7 @@ function tests_39_to_52() {
     if [ "$?" -ne "0" ];
     then
         echo "Something failed in do_create_keypair"
-        cleanUp
+        cleanUp "${admin_rc}"
         exit 1
 	
     fi
@@ -187,8 +184,8 @@ function tests_39_to_52() {
     source $OPENRC_DEMO1
 
     INSTANCE_NAME=`mktemp -u`
-    echo -n "45: nova boot --flavor $FLAVOR  --image $KVM_IMAGE --key_name $KEYNAME $INSTANCE_NAME"
-    IMAGE_ID=`nova boot --flavor $FLAVOR  --image $KVM_IMAGE --key_name $KEYNAME $INSTANCE_NAME | grep "id" | grep -v tenant_id | grep -v user_id | awk '{print $4}'`
+    echo -n "45: nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME $INSTANCE_NAME"
+    IMAGE_ID=`nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME $INSTANCE_NAME | grep "id" | grep -v tenant_id | grep -v user_id | awk '{print $4}'`
     for j in `seq 1 31`; do
 	sleep 2
 	RET=`nova show $IMAGE_ID | grep -i active`
@@ -198,7 +195,7 @@ function tests_39_to_52() {
 
 	if [ $j -eq "31" ]; then
             echo "Failed to launch instance"
-            cleanUp
+            cleanUp "${admin_rc}"
             exit 1
         fi
 	
@@ -214,7 +211,7 @@ function tests_39_to_52() {
         fi
 	if [ $j -eq "31" ]; then
 	    echo "Failed to ping instance"
-	    cleanUp 
+	    cleanUp "${admin_rc}"
 	    exit 1
 	fi
     done
@@ -252,8 +249,8 @@ function tests_39_to_52() {
     fi
     
     INSTANCE_NAME=`mktemp -u`
-    echo -n "49: nova boot --flavor $FLAVOR  --image $KVM_IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME"
-    RET=`nova boot --flavor $FLAVOR  --image $KVM_IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME `
+    echo -n "49: nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME"
+    RET=`nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME `
     IMAGE1_ID=`nova list | grep $INSTANCE_NAME | awk {'print $2}' | head -n 1`
     IMAGE2_ID=`nova list | grep $INSTANCE_NAME | awk {'print $2}' | tail -n 1`
     
@@ -266,7 +263,7 @@ function tests_39_to_52() {
 	
         if [ $j -eq "31" ]; then
                 echo "Failed to launch instance"
-                cleanUp
+                cleanUp "${admin_rc}"
                 exit 1
         fi
 	
