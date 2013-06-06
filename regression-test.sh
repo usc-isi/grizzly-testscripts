@@ -28,7 +28,7 @@ declare OPENRC_PATH=./
 declare OPENRC_DEMO1=openrc-demo1
 declare OPENRC_DEMO2=openrc-demo2
 declare HYPERVISOR=kvm
-
+declare IMAGE=kvm_fs
 declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
@@ -111,7 +111,7 @@ function do_get_options(){
 		FLAVOR=${OPTARG}
                 ;;
             i)
-                KVM_IMAGE=${OPTARG}
+                IMAGE=${OPTARG}
 		;;
 	    r)
 		OPENRC_ROOT=${OPTARG}
@@ -326,7 +326,7 @@ if [[ ${TEST_NUM} -gt "38" ]] && [[ ${TEST_NUM} -lt "52" ]]
 then
     echo "Cleanup before next Set of Tests"
     cleanup_env
-    tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}"
+    tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}" "${IMAGE}"
     TEST_NUM=53
 else
     echo "Skipping Tests: 39-52"

@@ -151,6 +151,11 @@ function tests_39_to_52() {
     OPENRC_DEMO1=$3
     OPENRC_DEMO2=$4
     FLAVOR=$5
+    IMAGE=$6
+
+    echo " ============================================================== "
+    echo " ================ Starting Tests 39-52 ======================== "
+    echo " ============================================================== "
 
     # expects admin openrc file to be sourced
     echo "Sourcing admin operc file: ${admin_rc}"
