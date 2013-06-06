@@ -302,8 +302,12 @@ fi
 # Malek's tests
 if [[ ${TEST_NUM} -gt "14" ]] && [[ ${TEST_NUM} -lt "27" ]]
 then
-    echo "Cleanup before next Set of Tests"
-    cleanup_env
+    echo "Cleanup of all instances/volumes but NOT IMAGES before next Set of Tests"
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
+    
     tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}"
     TEST_NUM=28
 else
