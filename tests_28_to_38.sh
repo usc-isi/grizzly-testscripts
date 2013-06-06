@@ -3,13 +3,14 @@
 
 source functions.sh
 source volume.sh
-
+source glance.sh
 
 function tests_28_to_38() {
 
-    #source openrc-root-cperi
     local log=$1
     local openrc_admin=$2
+    local openrc_path=$3
+    local openrc
     local msg
 
     echo " ============================================================== "
@@ -127,7 +128,8 @@ function tests_28_to_38() {
     fi
 
 
-    source openrc_admin
+    echo "Sourcing ADMIN Credentials File: ${openrc_admin}"
+    source ${openrc_admin}
     
     testNum=34
     echo " "
@@ -199,7 +201,10 @@ function tests_28_to_38() {
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
     echo euca_describe_images_output $euca_describe_images_output
     
-    source openrc-demo2
+    openrc="${openrc_path}/openrc-demo2"
+    echo "Sourcing Credentials Files: ${openrc}"
+    source ${openrc}
+
     if [ "`glance image-show $private_image | grep is_public | grep -i true`" ]; then 
 	euca-modify-image-attribute -l $private_image_id -r all
 	
@@ -254,7 +259,9 @@ function tests_28_to_38() {
     echo "---------------------------------------------------------------------------"
     echo "Step#${$testNum} user: delete an unauthorized image (should fail)"
     echo "---------------------------------------------------------------------------"
-    source openrc-demo2
+    openrc="${openrc_path}/openrc-demo2"
+    echo "Sourcing Credentials Files: ${openrc}"
+    source ${openrc}
     
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
     echo euca_describe_images_output $euca_describe_images_output
@@ -281,8 +288,8 @@ function tests_28_to_38() {
     echo TEST COMPLETED - CLEANUP
     echo 
     
-    nova image-delete $private_image
-    nova image-delete $public_image
+    clean_glance_repo "${openrc_admin}"
+    
 
     echo
 

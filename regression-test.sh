@@ -299,7 +299,7 @@ fi
 # Charles tests
 if [[ ${TEST_NUM} -gt "27" ]] && [[ ${TEST_NUM} -lt "38" ]]
 then
-    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}"
+    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}"
     TEST_NUM=39
 else
     echo "Skipping Tests:28-38"
