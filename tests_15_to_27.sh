@@ -114,13 +114,13 @@ function tests_15_to_27() {
 	    
 	    testNum=15
 	    msg="euca-create-volume -s 1 -z nova"
-	    $(print_test_msg "${testNum}" "${msg}" )
+	    print_test_msg "${testNum}" "${msg}" 
 	    RET=`euca-create-volume -s 1 -z nova`
 	    sleep 30
 		
 	    msg="Checking to make sure created volumes are available"
 	    command="euca-describe-volumes"
-	    $(print_test_command_msg "${testNum}" "${msg}" "${command}")
+	    print_test_command_msg "${testNum}" "${msg}" "${command}"	    
 	    RET=`euca-describe-volumes`
 	    status=`echo $RET | awk '{ print $5}'`
 	    volume=`echo $RET | awk '{ print $2}'`
@@ -145,14 +145,14 @@ function tests_15_to_27() {
 	    
 	    testNum=16
 	    msg="euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb"
-	    $(print_test_msg "${testNum}" "${msg}")
+	    print_test_msg "${testNum}" "${msg}"
 	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb`
 	    sleep 30
 	    
 
 	    msg="Checking to make sure created volumes are attached"
 	    command=" euca-describe-volumes"
-	    $(print_test_command_msg "${testNum}" "${msg}" "${command}")
+	    print_test_command_msg "${testNum}" "${msg}" "${command}"
 	    attached=$(volume_attached "${volume}")
 	    status=$(volume_status "${volume}")
 	    state=$(volume_state "${volume}")
