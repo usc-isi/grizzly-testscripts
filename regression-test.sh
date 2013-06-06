@@ -26,6 +26,7 @@ declare USER
 declare OPENRC_PATH=./
 declare OPENRC_DEMO1=openrc-demo1
 declare OPENRC_DEMO2=openrc-demo2
+declare HYPERVISOR=kvm
 
 declare TEST_NUM
 declare START_TEST_NUM=0
@@ -66,7 +67,7 @@ OPENRC_ROOT: ${OPENRC_ROOT}
 OPENRC_PATH: ${OPENRC_PATH}
 OPENRC_DEMO1: ${OPENRC_DEMO1}
 OPENRC_DEMO2: ${OPENRC_DEMO2}
-
+HYPERVISOR: ${HYPERVISOR}
 START_TEST: ${START_TEST_NUM}
 END_TEST: ${END_TEST_NUM}
 CONFIG
@@ -280,7 +281,7 @@ init_env
 # Mikyung's tests
 if [[ ${TEST_NUM} -lt "7" ]]
 then
-    tests_7_to_14 "${LOG_FILE}"
+    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}"
     TEST_NUM=15
 else
     echo "Skipping Tests:7-14"
