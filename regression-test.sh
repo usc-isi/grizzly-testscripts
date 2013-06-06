@@ -350,7 +350,7 @@ then
     echo "Cleanup before next Set of Tests"
     cleanup_env
     
-    tests_66_to_76 "${LOG_FILE}"
+    tests_66_to_76 "${LOG_FILE}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
 else
     echo "Skipping Tests:66-76"
 fi

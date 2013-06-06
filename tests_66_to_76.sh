@@ -2,11 +2,13 @@
 
 source functions.sh
 source volume.sh
-
+source glance.sh
 
 function tests_66_to_76() {
 
     local log=$1
+    local openrc_user1=$2
+    local openrc_user2=$3
     local msg
 
     timeoutWait=60
@@ -14,18 +16,10 @@ function tests_66_to_76() {
     image=cirros-0.3.1-x86_64-disk.img
     image_url=http://download.cirros-cloud.net/0.3.1/$image
     imageUploaded=false
-
-    source openrc-demo1
     
-    trap "{                                                                                                           
-    source openrc-demo1;                                                                                               
-    nova image-delete cirros-0.3.1;                                                                                    
-    nova image-delete private-cirros-0.3.1;                                                                            
-    nova image-delete snapshot-test68;                                                                                 
-    nova delete instance70;                                                                                            
+    source ${openrc_user1}
     nova keypair-delete key70;                                                                                         
-    /bin/rm key70.pem;                                                                                                 
-}" EXIT
+    /bin/rm key70.pem;                                                                          
 
     echo " ============================================================== "
     echo " ================ Starting Tests 66-76 ======================== "
@@ -98,7 +92,7 @@ function tests_66_to_76() {
     testNum=69
     print_test_msg "${testNum}" "user: create a new image from an unauthorized running instance"
 
-    source openrc-demo2
+    source ${openrc_user2}
     nova image-create $instanceName $snapshot
     if [ $? -ne 0 ]; then
 	msg="Step#${testNum} Successfully DONE"
@@ -109,8 +103,7 @@ function tests_66_to_76() {
     echo "${msg}"
     write_log "${msg}" "${log}"
 
-    source openrc-demo1
-
+    source ${openrc_user1}
     testNum=70
     print_test_msg "${testNum}" "user: launch an instance using snapshot image"
 
@@ -190,7 +183,7 @@ function tests_66_to_76() {
     testNum=74
     print_test_msg "${testNum}" "user: make a public image to private image owned by another user (should fail)"
 
-    source openrc-demo2
+    source ${openrc_user2}
     if [ "`glance image-show $name | grep is_public | grep -i true`" ]; then 
 	if [ "`glance image-update $name --is-public False | grep is_public | grep -i false`" ]; then
 	    msg="Step#${testNum} Failed to change image is_public status"
@@ -208,7 +201,7 @@ function tests_66_to_76() {
     testNum=75
     print_test_msg "${testNum}""user: delete an image"
 
-    source openrc-demo1
+    source ${openrc_user1}
     echo glance image-delete $privateName
     glance image-delete $privateName
     if [[ $? -eq 0 && -z "`glance index | grep $privateName`" ]]; then
@@ -222,7 +215,7 @@ function tests_66_to_76() {
     testNum=76
     print_test_msg "${testNum}" "user: delete an unauthorized image"
 
-    source openrc-demo2
+    source ${openrc_user2}
     if [ -n "`glance image-delete $name 2>&1 | grep Forbidden`" ]; then
 	msg="Step#${testNum} Successfully DONE"
     else
@@ -232,9 +225,7 @@ function tests_66_to_76() {
     write_log "${msg}" "${log}"
 
     # clean up
-    source openrc-demo1
-    glance image-delete $name
-    nova delete $instanceName
+    source ${openrc_user1}
     nova keypair-delete key70
     /bin/rm key70.pem
 
