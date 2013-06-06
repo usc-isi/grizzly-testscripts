@@ -44,7 +44,7 @@ $TENANT2
     for j in $TENANT; do
 	
 	echo " "
-	echo "[$i] $j TESTING ============================================================="
+	echo "[$LIBVIRT_TYPE] $j TESTING ============================================================="
 	openrc="${openrc_path}openrc-$j"
 
 	echo "Sourcing openrc file: ${openrc} for TENANT: $j"
