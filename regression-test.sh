@@ -251,8 +251,8 @@ function init_env() {
 function cleanup_env() {
 
     echo "Cleanup_env ------"
-    clean_glance_repo "openrc-demo1"
-    clean_glance_repo "openrc-demo2"
+    clean_glance_repo "${OPENRC_DEMO1}"
+    clean_glance_repo "${OPENRC_DEMO2}"
 
     euca_delete_keypair "openrc-demo1" "demo1"
     euca_delete_keypair "openrc-demo2" "demo2"
