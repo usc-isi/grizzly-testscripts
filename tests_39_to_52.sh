@@ -43,6 +43,7 @@ function do_user_stuff(){
 		echo "${msg}"
                 write_log "${msg}" "${log}"
 	fi
+
 	testNum=40
 	echo -n "40: keystone tenant-create --name=gotham"
 	local TenantID=`keystone tenant-create --name=gotham | grep id | awk '{print $4}'`
@@ -199,7 +200,9 @@ function tests_39_to_52() {
 	fi
 
 	if [ $j -eq "31" ]; then
-            echo "Failed to launch instance"
+            msg="Failed to launch instance"
+	    echo "${msg}"
+            write_log "${msg}" "${log}"
             cleanUp "${admin_rc}"
             exit 1
         fi
@@ -211,11 +214,13 @@ function tests_39_to_52() {
 	sleep 2
 	RET=`ping_host $PUBLIC_IP`
 	if [ $RET -eq 0 ]; then
-	    echo " success"
+	    echo "success"
             break
         fi
 	if [ $j -eq "31" ]; then
-	    echo "Failed to ping instance"
+	    msg="Failed to ping instance"
+	    echo "${msg}"
+            write_log "${msg}" "${log}"
 	    cleanUp "${admin_rc}"
 	    exit 1
 	fi
@@ -229,30 +234,40 @@ function tests_39_to_52() {
 	    break
 	fi
 	if [ "$i" -eq "$TIMEOUT" ]; then
-	    echo "Failed to log into instance."
+	    msg="Failed to log into instance."
+	    echo "${msg}"
+            write_log "${msg}" "${log}"
 	    exit 1
 	fi
     done
+
     source $OPENRC_DEMO2
+    testNum=47
     echo -n "47: ssh -o "StrictHostKeyChecking no,BatchMode yes" -i $KEYNAME_2 root@$PUBLIC_IP ls > /dev/null"
     ssh -o "StrictHostKeyChecking no" -o "BatchMode yes" -i $KEYNAME_2 root@$PUBLIC_IP ls > /dev/null
     if [ $? -eq 0 ]; then
-	echo "Logged into VM as unauthorized user, fail."
+	msg="Step# ${testNum} FAILED: Logged into VM as unauthorized user"
+	echo "${msg}"
+        write_log "${msg}" "${log}"
 	exit 1
     else
 	echo " success"
     fi
     source $OPENRC_DEMO1
     
+    testNum=48
     echo -n "48: nova boot --flavor $FLAVOR  --image $UNAUTHORIZED_IMAGE --key_name $KEYNAME $INSTANCE_NAME"
     RET=`nova boot --flavor $FLAVOR  --image $UNAUTHORIZED_IMAGE --key_name $KEYNAME $INSTANCE_NAME`
     if [ "$?" -ne "1" ];
     then
-	echo "Booted an unauthorized image, fail."
+	msg="Step#${testNum} Failed. Booted an unauthorized image"
+	echo "${msg}"
+        write_log "${msg}" "${log}"
     else
 	echo " success."
     fi
     
+    testNum=49
     INSTANCE_NAME=`mktemp -u`
     echo -n "49: nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME"
     RET=`nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME --num-instances 2 $INSTANCE_NAME `
@@ -267,7 +282,9 @@ function tests_39_to_52() {
         fi
 	
         if [ $j -eq "31" ]; then
-                echo "Failed to launch instance"
+                msg="Step#${testNum} Failed: Failed to launch instance"
+		echo "${msg}"
+                write_log "${msg}" "${log}"
                 cleanUp "${admin_rc}"
                 exit 1
         fi
@@ -282,8 +299,10 @@ for j in `seq 1 31`; do
         break
     fi
     if [ $j -eq "31" ]; then
-        echo "Failed to ping instance"
-        cleanUp
+        msg="Failed to ping instance"
+	echo "${msg}"
+        write_log "${msg}" "${log}"
+        cleanUp "${admin_rc}"
         exit 1
     fi
 done
@@ -296,8 +315,10 @@ for j in `seq 1 31`; do
     fi
     
     if [ $j -eq "31" ]; then
-        echo "Failed to launch instance"
-        cleanUp
+        msg="Failed to launch instance"
+	echo "${msg}"
+        write_log "${msg}" "${log}"
+        cleanUp "${admin_rc}"
         exit 1
         fi
     
@@ -312,27 +333,33 @@ for j in `seq 1 31`; do
         break
     fi
     if [ $j -eq "31" ]; then
-                echo "Failed to ping instance"
-                cleanUp
+                msg="Failed to ping instance"
+		echo "${msg}"
+                write_log "${msg}" "${log}"
+                cleanUp "${admin_rc}"
                 exit 1
     fi
 done
 
 source $OPENRC_DEMO2
+testNum=52
 echo -n "52: nova delete $IMAGE_ID (as an unauthorized user)"
 RET=`nova delete $IMAGE_ID`
 source $OPENRC_DEMO1
 RET=`nova list | grep -c $IMAGE_ID`
 if [ "$RET" -ne "1" ];
 then
-    echo "Delete image as an unauthorized user worked, fail."
-    cleanUp
+    msg="Step#${testNum} Failed: Delete image as an unauthorized user worked, fail."
+    echo "${msg}"
+    write_log "${msg}" "${log}"
+    cleanUp "${admin_rc}"
     exit 1
 else
     echo " success."
 fi
 
 source $OPENRC_DEMO1
+testNum=50
 echo -n "50: nova delete $IMAGE_ID"
 RET=`nova delete $IMAGE_ID`
 for i in `seq 1 $TIMEOUT`; do
@@ -344,12 +371,16 @@ for i in `seq 1 $TIMEOUT`; do
     fi
     
     if [ "$i" -eq "$TIMEOUT" ]; then
-	echo "Delete image as authorized user failed."
+	msg="Step# ${testNum} Failed. Delete image as authorized user failed."
+	echo "${msg}"
+	write_log "${msg}" "${log}"
 	exit 1
 	
     fi
 
 done
+
+testNum=51
 echo -n "51: nova delete $IMAGE1_ID $IMAGE2_ID"
 RET=`nova delete $IMAGE1_ID $IMAGE2_ID`
 for i in `seq 1 $TIMEOUT`; do
@@ -361,7 +392,9 @@ for i in `seq 1 $TIMEOUT`; do
     fi
     
     if [ "$i" -eq "$TIMEOUT" ]; then
-        echo "Delete image as authorized user failed."
+        msg="Step#${testNum} Delete image as authorized user failed."
+	echo "${msg}"
+	write_log "${msg}" "${log}"
         exit 1
 	
     fi
@@ -374,7 +407,7 @@ do_delete_keypair $OPENRC_DEMO1 $KEYNAME
 if [ "$?" -ne "0" ];
 then
         echo "Something failed in do_delete_keypair"
-        cleanUp
+        cleanUp "${admin_rc}"
         exit 1
 
 fi
@@ -382,7 +415,7 @@ do_delete_keypair $OPENRC_DEMO2 $KEYNAME_2
 if [ "$?" -ne "0" ];
 then
         echo "Something failed in do_delete_keypair"
-        cleanUp
+        cleanUp "${admin_rc}"
         exit 1
 
 fi
