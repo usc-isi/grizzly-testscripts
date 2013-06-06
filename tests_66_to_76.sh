@@ -11,11 +11,11 @@ function tests_66_to_76() {
     local openrc_user2=$3
     local msg
 
-    timeoutWait=60
-    name=cirros-0.3.1
-    image=cirros-0.3.1-x86_64-disk.img
-    image_url=http://download.cirros-cloud.net/0.3.1/$image
-    imageUploaded=false
+    local timeoutWait=60
+    local name=cirros-0.3.1
+    local image=cirros-0.3.1-x86_64-disk.img
+    local image_url=http://download.cirros-cloud.net/0.3.1/$image
+    local imageUploaded=false
     
     source ${openrc_user1}
     nova keypair-delete key70;                                                                                         
