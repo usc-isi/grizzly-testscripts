@@ -127,7 +127,6 @@ function tests_28_to_38() {
 	write_log "${msg}" "${log}"
     fi
 
-
     echo "Sourcing ADMIN Credentials File: ${openrc_admin}"
     source ${openrc_admin}
     
@@ -159,7 +158,6 @@ function tests_28_to_38() {
 	echo "${msg}"
 	write_log "${msg}" "${log}"
     fi
-
 
     testNum=35
     echo " "
@@ -289,8 +287,4 @@ function tests_28_to_38() {
     echo 
     
     clean_glance_repo "${openrc_admin}"
-    
-
-    echo
-
 }
