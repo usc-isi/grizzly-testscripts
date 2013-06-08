@@ -128,13 +128,13 @@ function tests_66_to_76() {
 	echo "${msg}"
         write_log "${msg}" "${log}"
     fi
-    
+
     testNum=71
     msg="user: launch an instance using snapshot image"
     print_test_msg "${testNum}" "${msg}"
 
     if [ $snapshotInstanceOk ]; then
-	ip=$(nova list | grep $instanceName | get_field -1 | sed 's/net=//')
+	ip=$(nova list | grep $instanceName | get_field -1 | sed 's/.*=//')
 	timeout_check $timeoutWait "ssh -o StrictHostKeyChecking=no -i ${keyName}.pem cirros@$ip env | grep HOME | grep cirros"
 	if [ $? -eq 0 ]; then
 	    msg="Step#${testNum} Successfully DONE"
