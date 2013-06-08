@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -x
+set -x
 
 source functions.sh
 source volume.sh
@@ -9,11 +9,11 @@ KVM_FLAVOR=1
 INST_KVM_NAME=test54
 INST_BAD_NAME=test55
 
-KEY_FILE="/root/testKey5365"
+KEY_FILE="./testKey5365"
 KEY_PAIR="testKey5365"
 
-USER1_PARAM="--os-username admin --os-password secrete --os-tenant demo --os-auth-url http://127.0.0.1:5000/v2.0/"
-USER2_PARAM="--os-username glance --os-password glance --os-tenant service --os-auth-url http://127.0.0.1:5000/v2.0/"
+USER1_PARAM="--os-username demo1 --os-password demo1_secrete --os-tenant demo_tenant1 --os-auth-url http://127.0.0.1:5000/v2.0/"
+USER2_PARAM="--os-username demo2 --os-password demo2_secrete --os-tenant demo_tenant2 --os-auth-url http://127.0.0.1:5000/v2.0/"
 
 VOL_GOOD_NAME=test53
 VOL_SIZE=1
@@ -60,7 +60,7 @@ function tests_53_to_65() {
 
     makeAddKey $KEY_PAIR $KEY_FILE "$USER1_PARAM"
     nova_bootInstance "$USER1_PARAM" $INST_KVM_NAME $KVM_FLAVOR $IMAGE "--key-name $KEY_PAIR"
-    KVM_IP=`nova $USER1_PARAM list | grep $INST_KVM_NAME | awk '{ print \$8 }' | sed 's/public=//'`
+    KVM_IP=`nova $USER1_PARAM list | grep $INST_KVM_NAME | awk '{ print \$8 }' | sed 's/.*=//'`
     
     echo "Got IP for KVM $KVM_IP"
     # Wait until the network is up in the guest
@@ -68,7 +68,7 @@ function tests_53_to_65() {
     sleep 40
 
     echo "Looking for /dev/vdb before attaching: $STATUS"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls /dev/vdb"
+    sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls $DEV_NAME"
     
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     echo "Status of freshly created volume: $STATUS"
@@ -79,25 +79,31 @@ function tests_53_to_65() {
     if [ "${HYPERVISOR}" == "kvm" ]
     then
       ## KVM part: make ext3 fs partition and format it
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls /dev/vdb"
-	echo "Looking for /dev/vdb after attaching: $STATUS"
+        sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls $DEV_NAME"
+	echo "Looking for $DEV_NAME after attaching: $STATUS"
     
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 /dev/vdb"
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount /dev/vdb /mnt"
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt"
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
-    
-	if [ "$STATUS" == "Hello" ];
-	then
-	    msg="PASSED Test 54: Format, write and read back"
-	else
-	    msg="FAILED Test 54: Read back $STATUS"
-	fi
+        if [ "$STATUS" == "$DEV_NAME" ];
+        then
+
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 $DEV_NAME"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $DEV_NAME /mnt"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
+
+            if [ "$STATUS" == "Hello" ];
+            then
+                msg="=== PASSED Test 54: Format, write and read back"
+            else
+                msg="=== FAILED Test 54: Read back $STATUS" 
+            fi
+
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
+        else
+            msg="=== FAILED Test 54: Device $DEV_NAME is not present in the guest: $STATUS"
+        fi
+
 	echo "${msg}"
 	write_log "${msg}" "${log}"
-
-	sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
-
     else
 	echo "LXC PART TODO"
 	exit 1
@@ -151,6 +157,7 @@ function tests_53_to_65() {
     then
 	msg="Failed to create valume for test 56: got status $STATUS"
 	echo "${msg}"
+        exit 1
     fi 
     
     echo "Errors are okay: this is a denial test"
@@ -188,25 +195,25 @@ function tests_53_to_65() {
     nova_volumeStatus STATUS $VOL_GOOD_NAME "$USER1_PARAM"
     if [ "$STATUS" == "in-use" ];
     then
-	msg="Volume reattach (test57 kvm) succeeded"
+	echo "Volume reattach (test57 kvm) succeeded"
+        ## Check contents
+        NEW_DEV=""
+        sendSshAndGet NEW_DEV $KEY_FILE $KVM_IP "ls /dev/vd? | grep -v vda"
+        echo "Found reaatached volume as $NEW_DEV"
+        sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $NEW_DEV /mnt"
+        sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
+        if [ "$STATUS" == "Hello" ];
+        then
+            msg="=== PASSED Test 57: Read content from reattached volume"
+        else
+            msg="=== FAILED Test 57: Reading reattached volume: $STATUS"
+        fi
+        sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
     else
-	msg="Volume reattach (test57 kvm) failed. Volume status is $STATUS"
+	msg="=== FAIL Test 57: Volume reattach status is $STATUS"
     fi
     echo "${msg}"
     write_log "${msg}" "${log}"
-
-    ## Check contents
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount /dev/vdb /mnt"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
-    if [ "$STATUS" == "Hello" ];
-    then 
-	msg="PASSED Test 57: Read content from reattached volume"
-    else
-	msg="FAILED Test 57: Reading reattached volume: $STATUS"
-    fi
-    echo "${msg}"
-    write_log "${msg}" "${log}"
-
     
     ########################################################################################################
     # 59 nova user: create multiple volumes
@@ -259,8 +266,8 @@ function tests_53_to_65() {
     nova_detachVolume "$USER1_PARAM" $INST_KVM_NAME $VOL_GOOD_NAME
     delete_all_volumes # no openrc file here?
 
-    #nova $USER1_PARAM keypair-delete $KEY_PAIR
-    #rm -f $KEY_FILE
-    #rm -f "$KEY_FILE.pub"
+    nova $USER1_PARAM keypair-delete $KEY_PAIR
+    rm -f $KEY_FILE
+    rm -f "$KEY_FILE.pub"
 
 }
