@@ -119,7 +119,7 @@ function nova_createVolume {
   while [ "$status" == "creating" ]; do
     echo "Volume is not ready yet: $status"
     sleep 4
-    let status=`eval $check`
+    status=`eval $check`
   done
   eval "$1=$status"
 }
@@ -160,10 +160,14 @@ function nova_attachVolume {
   echo "Trying to attach volume $volume_name to $instance"
 
   local volume_id=""
-  getVolumeField volume_id $volume_name "$params" 2
-
-  nova $params volume-attach $instance $volume_id $device
-  sleep 30
+  nova_getVolumeField volume_id $volume_name "$params" 2
+  if [ "$volume_id" == "" ];
+  then
+     echo "Volume $volume_name is not found, cannot attach"
+  else
+     nova $params volume-attach $instance $volume_id $device
+     sleep 30
+  fi
 }
 
 function nova_detachVolume {
@@ -179,7 +183,7 @@ function nova_detachVolume {
 
 # Get attachement instance of volume $2. Return as 1  
 function nova_attachedTo {
-  getVolumeField $1 $2 "$3" 12
+  nova_getVolumeField $1 $2 "$3" 12
 }
 
 function nova_getVolumeField {
@@ -191,6 +195,6 @@ function nova_getVolumeField {
 }
 
 function nova_volumeStatus {
-  getVolumeField $1 $2 "$3" 4
+  nova_getVolumeField $1 $2 "$3" 4
 }
 
