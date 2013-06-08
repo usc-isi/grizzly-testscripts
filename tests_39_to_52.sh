@@ -192,7 +192,7 @@ function tests_39_to_52() {
     INSTANCE_NAME=`mktemp -u`
     echo -n "45: nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME $INSTANCE_NAME"
     IMAGE_ID=`nova boot --flavor $FLAVOR  --image $IMAGE --key_name $KEYNAME $INSTANCE_NAME | grep "id" | grep -v tenant_id | grep -v user_id | awk '{print $4}'`
-    for j in `seq 1 31`; do
+    for j in `seq 1 61`; do
 	sleep 2
 	RET=`nova show $IMAGE_ID | grep -i active`
 	if [ $? -eq 0 ]; then
