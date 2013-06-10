@@ -2,6 +2,7 @@
 
 source functions.sh
 source volume.sh
+source glance.sh
 
 function tests_15_to_27() {
 
@@ -41,6 +42,13 @@ function tests_15_to_27() {
     echo " ============================================================== "
     echo " ================ Starting Tests 15-27 ======================== "
     echo " ============================================================== "
+
+    # try to delete file in case it exists from previous failed regression run
+    if [ -e "${FILE}" ]
+    then
+	echo "Old file ${FILE} exists, possibly from previous run --> deleting"
+	rm -rf ${FILE}
+    fi
 
     if [ "$LIBVIRT_TYPE" = "kvm" ]; then
 	INST_TYPE=m1.tiny
