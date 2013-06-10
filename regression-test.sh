@@ -25,6 +25,7 @@ declare LOG_FILE
 declare USER
 declare FLAVOR=m1.tiny
 declare OPENRC_PATH=./
+declare OPENRC_ROOT=/root/openrc
 declare OPENRC_DEMO1=openrc-demo1
 declare OPENRC_DEMO2=openrc-demo2
 declare HYPERVISOR=kvm
@@ -253,6 +254,9 @@ function init_env() {
 
 # Function to create nova flavors for LXC testing
 function create_lxc_flavor() {
+
+    echo "Sourcing root credentials: ${OPENRC_ROOT} to create LXC Flavors"
+    source ${OPENRC_ROOT}
 
     echo "Creating cg1.medium flavor"
     nova flavor-create --is-public True cg1.medium 11 4096 20 2
