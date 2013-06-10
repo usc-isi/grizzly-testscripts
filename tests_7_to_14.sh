@@ -9,6 +9,8 @@ function tests_7_to_14() {
     local log=$1
     local openrc_path=$2
     local LIBVIRT_TYPE=$3
+    local FLAVOR=$4
+    local USER=$5
     local openrc
     local msg
     local msg2
@@ -28,18 +30,6 @@ $TENANT2
     echo " ============================================================== "
     echo " ================ Starting Tests 7-14  ======================== "
     echo " ============================================================== "
-
-
-    if [ "$LIBVIRT_TYPE" = "kvm" ]; then
-	INST_TYPE=m1.tiny
-	USER=root
-    elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
-	INST_TYPE=m1.tiny
-	USER=nova
-    else
-	echo "ERROR: Unknown LIBVIRTTYPE: $LIBVIRT_TYPE"
-	exit 1
-    fi 
 
     for j in $TENANT; do
 	
@@ -68,9 +58,9 @@ $TENANT2
 	    
 	    echo " "
 	    echo "---------------------------------------------------------------------------"
-	    echo " 7. euca-run-instances -k $KEY_NAME -t $INST_TYPE $IMG_NAME"
+	    echo " 7. euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME"
 	    echo "---------------------------------------------------------------------------"
-	    RET=`euca-run-instances -k $KEY_NAME -t $INST_TYPE $IMG_NAME`
+	    RET=`euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME`
 	    echo " Please wait until one instance is running"
 	    sleep 60 
 	    for k in `seq 1 $TIMEOUT`; do
@@ -144,9 +134,9 @@ $TENANT2
 		
 		echo " "
 		echo "---------------------------------------------------------------------------"
-		echo "11. euca-run-instances -k $KEY_NAME -n $INST_CNT -t $INST_TYPE $IMG_NAME"
+		echo "11. euca-run-instances -k $KEY_NAME -n $INST_CNT -t $FLAVOR $IMG_NAME"
 		echo "---------------------------------------------------------------------------"
-		RET=`euca-run-instances -k $KEY_NAME -n $INST_CNT -t $INST_TYPE $IMG_NAME`
+		RET=`euca-run-instances -k $KEY_NAME -n $INST_CNT -t $FLAVOR $IMG_NAME`
 		echo " Please wait until $INST_CNT instances are running"
 		sleep 60
 		for k in `seq 1 $TIMEOUT`; do
@@ -220,9 +210,9 @@ $TENANT2
 		
 		echo " "
 		echo "---------------------------------------------------------------------------"
-		echo "10. euca-run-instances -k $KEY_NAME -t $INST_TYPE $OTHER_IMG_NAME"
+		echo "10. euca-run-instances -k $KEY_NAME -t $FLAVOR $OTHER_IMG_NAME"
 		echo "---------------------------------------------------------------------------"
-		euca-run-instances -k $KEY_NAME -t $INST_TYPE $OTHER_IMG_NAME
+		euca-run-instances -k $KEY_NAME -t $FLAVOR $OTHER_IMG_NAME
 		RETVAL=$?
 		if [ $RETVAL -eq 1 ]; then
 		    msg=" =====> Step#10. is successfully DONE: $OTHER_IMG_NAME ImageNotFound"

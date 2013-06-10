@@ -247,8 +247,21 @@ function init_env() {
     
     echo "create volume for demo2"
     nova volume-create --display-name "demo2" 1
+
+    create_lxc_flavor
 }
 
+# Function to create nova flavors for LXC testing
+function create_lxc_flavor() {
+
+    echo "Creating cg1.medium flavor"
+    nova flavor-create --is-public True cg1.medium 11 4096 20 2
+    nova flavor-key 11 set gpus="= 1"
+    nova flavor-key 11 set gpu_arch="s== fermi"
+    nova flavor-key 11 set cpu_arch="s== x86_64"
+    nova flavor-key 11 set hypervisor_type="s== LXC"
+        
+}
 
 # Function to do full clean
 function cleanup_env() {
@@ -293,7 +306,7 @@ init_env
 # Mikyung's tests
 if [[ ${TEST_NUM} -lt "7" ]]
 then
-    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}"
+    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}"
     TEST_NUM=15
 else
     echo "Skipping Tests:7-14"
