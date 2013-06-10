@@ -9,16 +9,17 @@ function tests_15_to_27() {
     local log=$1
     local openrc_path=$2
     local LIBVIRT_TYPE=$3
+    local FLAVOR=$4
+    local USER=$5
+    local TIMEOUT=$6
     local msg
     
     TENANT1=demo1
     TENANT2=demo2
     INST_CNT=3
-    TIMEOUT=60
     
     declare INST_IP
     declare INST_ID
-    declare INST_TYPE
     declare KEYNAME
     declare KEY
     declare KEY_EXIST
@@ -48,17 +49,6 @@ function tests_15_to_27() {
     then
 	echo "Old file ${FILE} exists, possibly from previous run --> deleting"
 	rm -rf ${FILE}
-    fi
-
-    if [ "$LIBVIRT_TYPE" = "kvm" ]; then
-	INST_TYPE=m1.tiny
-	USER=root
-    elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
-	INST_TYPE=m1.tiny
-	USER=nova
-    else
-	echo "ERROR: Unknown LIBVIRTTYPE: $LIBVIRT_TYPE"
-        exit 1
     fi
 	
     for j in $TENANT; do
@@ -92,9 +82,9 @@ function tests_15_to_27() {
 	    
 	    echo " "
 	    echo "---------------------------------------------------------------------------"
-	    echo " 7. euca-run-instances -k $KEY_NAME -t $INST_TYPE $IMG_NAME"
+	    echo " 7. euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME"
 	    echo "---------------------------------------------------------------------------"
-	    RET=`euca-run-instances -k $KEY_NAME -t $INST_TYPE $IMG_NAME`
+	    RET=`euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME`
 	    echo " Please wait until one instance is running"
 	    sleep 60
 	    for k in `seq 1 $TIMEOUT`; do

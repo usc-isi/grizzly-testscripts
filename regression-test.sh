@@ -30,6 +30,7 @@ declare OPENRC_DEMO1=openrc-demo1
 declare OPENRC_DEMO2=openrc-demo2
 declare HYPERVISOR=kvm
 declare IMAGE=kvm_fs
+declare TIMEOUT=60
 declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
@@ -50,6 +51,7 @@ Syntax
 -u (user, default root)
 -S (Start Test Number)
 -E (End Test Number)
+-T (TimeOut Period: default 60 Seconds)
 
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova
 
@@ -71,6 +73,7 @@ OPENRC_DEMO1: ${OPENRC_DEMO1}
 OPENRC_DEMO2: ${OPENRC_DEMO2}
 HYPERVISOR: ${HYPERVISOR}
 FLAVOR: ${FLAVOR}
+TIMEOUT: ${TIMEOUT}
 START_TEST: ${START_TEST_NUM}
 END_TEST: ${END_TEST_NUM}
 CONFIG
@@ -311,7 +314,7 @@ init_env
 # Mikyung's tests
 if [[ ${TEST_NUM} -lt "7" ]]
 then
-    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}"
+    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}"
     TEST_NUM=15
 else
     echo "Skipping Tests:7-14"
@@ -326,7 +329,7 @@ then
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
     
-    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}"
+    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}"
     TEST_NUM=28
 else
     echo "Skipping Tests:15-27"

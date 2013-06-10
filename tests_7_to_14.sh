@@ -11,6 +11,7 @@ function tests_7_to_14() {
     local LIBVIRT_TYPE=$3
     local FLAVOR=$4
     local USER=$5
+    local TIMEOUT=$6
     local openrc
     local msg
     local msg2
@@ -19,7 +20,6 @@ function tests_7_to_14() {
     TENANT2=demo2
     INST_CNT=3
     INST_CNT_1=`expr $INST_CNT - 1`
-    TIMEOUT=60
     
     TENANT="
 $TENANT1
