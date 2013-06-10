@@ -136,7 +136,7 @@ function tests_28_to_38() {
     testNum=34
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: make a private image public"
+    echo "Step#${testNum} user: make a private image public"
     echo "---------------------------------------------------------------------------"
     
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
