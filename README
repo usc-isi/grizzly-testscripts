@@ -34,8 +34,9 @@ Additional images are necessary for several of the subscripts (update README as 
 -m (the Member role, default Member)                                                                                  
 -n (network, default public)                                                                                          
 -u (user, default root)                                                                                               
--S (Start Test Number)                                                                                                
--E (End Test Number)                                                                                                  
+-S (Start Test Number)                                                                                               
+
+-E (End Test Number)                                                                                               
                                                                                                                       
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova    
 
@@ -52,6 +53,13 @@ bash regression-test.sh -l log.txt -r /root/openrc -p . -h kvm
 # Run set of test-cases: e.g. 7-14
   $ bash regression-test.sh -l log.txt -r /root/openrc -S 7 -E 14
 
+# Run LXC Test:
+- all tests
+- admin credentials file:/root/openrc
+- output to log file: log.txt
+- User Root
+- cg1.medium flavor 
+  $ bash regression-test.sh - log.txt -r /root/openrc -p . -h lxc -u root -f cg1.medium
 
 
 ############## Other Functions ###############
