@@ -5,6 +5,8 @@ source functions.sh
 source volume.sh
 source glance.sh
 
+set -x
+
 function tests_28_to_38() {
 
     local log=$1
@@ -30,6 +32,7 @@ function tests_28_to_38() {
 
 
     trap "{
+    echo 'In trap'
     source ${openrc_admin};
     nova image-delete $private_image;
     nova image-delete $public_image;
@@ -39,7 +42,7 @@ function tests_28_to_38() {
     testNum=28
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: upload a new public image"
+    echo "Step#${testNum} user: upload a new public image"
     echo "---------------------------------------------------------------------------"
     
     euca-bundle-image -i $image
@@ -86,7 +89,7 @@ function tests_28_to_38() {
     testNum=29
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: upload a new private image"
+    echo "Step#${testNum} user: upload a new private image"
     echo "---------------------------------------------------------------------------"
 
     euca-bundle-image -i $image
