@@ -89,7 +89,13 @@ function tests_15_to_27() {
 	    sleep 60
 	    for k in `seq 1 $TIMEOUT`; do
 		INST_ID=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print $2 }'`
-		INST_IP=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print $15 }'` 
+                if [ "${LIBVIRT_TYPE}" = "kvm" ]
+                    then
+                    INST_IP=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print$15 }' | head -n 1`
+                else
+                    INST_IP=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print$14 }' | head -n 1`
+		fi
+
 		if [ -z $INST_IP ]; then
 		    msg=" =====> Step#7. is not running yet: $INST_ID $INST_IP"
 		    echo "${msg}"
