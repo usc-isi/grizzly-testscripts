@@ -104,7 +104,7 @@ function tests_15_to_27() {
 		    msg=" =====> Step#7. is not running yet: $INST_ID $INST_IP"
 		    echo "${msg}"
                     write_log "${msg}" "${log}"
-		    else
+		else
 		    msg=" =====> Step#7. is successfully DONE: "
 		    echo "${msg}"
                     write_log "${msg}" "${log}"
