@@ -29,7 +29,10 @@ Additional images are necessary for several of the subscripts (update README as 
 -f (flavor, default m1.tiny)                                                                                          
 -i (image, default kvm_fs)                                                                                            
 -r (openrc_root full path, default /root/openrc)                                                                      
--p (path to openrc-demo1/2, default /root/jp_scripts/)                                                                
+-p (path to openrc-demo1/2, default /root/jp_scripts/)                                                               
+
+-t (timeout period, recommended 100 for KVM, 200 for LXC)
+ 
 -l (log file for test outputs (Pass/Fail)                                                                             
 -m (the Member role, default Member)                                                                                  
 -n (network, default public)                                                                                          

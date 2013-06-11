@@ -12,6 +12,7 @@ function tests_28_to_38() {
     local log=$1
     local openrc_admin=$2
     local openrc_path=$3
+    local timeoutWait=$4
     local openrc
     local msg
 
@@ -19,7 +20,6 @@ function tests_28_to_38() {
     echo " ================ Starting Tests 28-38 ======================== "
     echo " ============================================================== "
 
-    timeoutWait=60
     sleepWait=5
     name=cirros-0.3.1
     image=cirros-0.3.1-x86_64-disk.img

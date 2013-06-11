@@ -11,7 +11,7 @@ function tests_66_to_76() {
     local openrc_user2=$3
     local msg
 
-    local timeoutWait=60
+    local timeoutWait=$4
     local name=cirros-0.3.1
     local image=cirros-0.3.1-x86_64-disk.img
     local image_url=http://download.cirros-cloud.net/0.3.1/$image

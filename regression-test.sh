@@ -340,7 +340,7 @@ if [[ ${TEST_NUM} -gt "27" ]] && [[ ${TEST_NUM} -lt "38" ]]
 then
     echo "Cleanup before next Set of Tests"
     cleanup_env
-    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}"
+    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}" "${TIMEOUT}"
     TEST_NUM=39
 else
     echo "Skipping Tests:28-38"
@@ -351,7 +351,7 @@ if [[ ${TEST_NUM} -gt "38" ]] && [[ ${TEST_NUM} -lt "52" ]]
 then
     echo "Cleanup before next Set of Tests"
     cleanup_env
-    tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}" "${IMAGE}"
+    tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}" "${IMAGE}" "${TIMEOUT}"
     TEST_NUM=53
 else
     echo "Skipping Tests: 39-52"
@@ -363,7 +363,7 @@ then
     echo "Cleanup before next Set of Tests"
     cleanup_env
  
-    tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}"
+    tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}" "${TIMEOUT}"
     TEST_NUM=66
 else
     echo "Skipping Tests: 53-65"
@@ -375,7 +375,7 @@ then
     echo "Cleanup before next Set of Tests"
     cleanup_env
     
-    tests_66_to_76 "${LOG_FILE}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}"
+    tests_66_to_76 "${LOG_FILE}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${TIMEOUT}"
 else
     echo "Skipping Tests:66-76"
 fi

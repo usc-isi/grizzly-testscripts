@@ -25,6 +25,7 @@ function tests_53_to_65() {
     local log=$1
     local IMAGE=$2
     local HYPERVISOR=$3
+    local TIMEOUT=$4
     local msg
 
     echo " ============================================================== "
