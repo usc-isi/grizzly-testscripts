@@ -307,7 +307,7 @@ function cleanup_env() {
     
     echo "Removing any leftover nova instances..."
     rm -rf /var/lib/nova/instances/_base/*
-    rm -rf /var/lib/nova/instances/instance-*
+    rm -rf /var/lib/nova/instances/*-*
 
     echo "Cleanup DONE!"
 }
