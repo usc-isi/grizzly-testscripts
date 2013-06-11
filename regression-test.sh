@@ -302,6 +302,13 @@ function cleanup_env() {
     
     clean_gpu_allocation
 
+    echo "removing any leftover glance images..."
+    rm -rf /var/lib/glance/images/*
+    
+    echo "Removing any leftover nova instances..."
+    rm -rf /var/lib/nova/instances/_base/*
+    rm -rf /var/lib/nova/instances/instance-*
+
     echo "Cleanup DONE!"
 }
 
