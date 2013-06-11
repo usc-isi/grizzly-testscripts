@@ -44,6 +44,9 @@ $TENANT2
 	    IMG_NAME=`euca-describe-images | grep $j | grep fs | grep -v lxc | grep ami | awk '{ print $2 }' | head -n 1`
 	elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
 	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }' | head -n 1`
+	    # for LXC, create many loopback devices to avoid error: 'These required options are missing: device
+	    echo "Creating Loopback Devices for LXC"
+            MAKEDEV -v /dev/loop
 	fi
 	    
 	if [ "$IMG_NAME" ]; then
