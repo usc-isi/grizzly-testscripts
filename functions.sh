@@ -214,6 +214,7 @@ function delete_all_instances() {
 
     echo "Terminating all euca instances using credentials file: ${cred_file}"
     $(euca-terminate-instances $(euca-describe-instances |grep i-|cut -f 2))
+    sleep 30
 }
 
 

@@ -98,6 +98,7 @@ function delete_all_volumes() {
     source $cred_file
     echo "Deleting all Volumes using credential file: ${cred_file}"
     python euca-volume-delete-all
+    sleep 30
 }
 
 ##### NOVA VOLUME RELATED FUNCTIONS ######
@@ -178,7 +179,7 @@ function nova_detachVolume {
 
   nova_getVolumeField volume_id $3 "$params" 2
   nova $params volume-detach $instance $volume_id
-  sleep 5
+  sleep 10
 }
 
 # Get attachement instance of volume $2. Return as 1  
