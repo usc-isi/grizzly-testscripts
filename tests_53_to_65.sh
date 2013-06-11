@@ -66,7 +66,7 @@ function tests_53_to_65() {
     echo "Got IP for KVM $KVM_IP"
     # Wait until the network is up in the guest
     echo "Waiting for the guest to boot"
-    sleep 40
+    sleep ${TIMEOUT}
 
     echo "Looking for /dev/vdb before attaching: $STATUS"
     sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls $DEV_NAME"
