@@ -271,6 +271,13 @@ function create_lxc_flavor() {
         
 }
 
+function clean_gpu_allocation() {
+
+    echo "Manually removing gpus_allocated file to ensure clean GPU-deallocation"
+    sleep 10 # small delay to give nova proper time to deallocate gpus
+    rm /var/lib/nova/gpus_allocated
+}
+
 # Function to do full clean
 function cleanup_env() {
 
@@ -278,18 +285,23 @@ function cleanup_env() {
     echo "------ Cleaning Up All Instances/Images/Volumes ------"
     echo "======================================================"
 
+    delete_all_instances "${OPENRC_ROOT}"
     delete_all_instances "${OPENRC_DEMO1}"
     delete_all_instances "${OPENRC_DEMO2}"
 
+    clean_glance_repo "${OPENRC_ROOT}"
     clean_glance_repo "${OPENRC_DEMO1}"
     clean_glance_repo "${OPENRC_DEMO2}"
 
+    delete_all_volumes "${OPENRC_ROOT}"
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
 
     euca_delete_keypair "openrc-demo1" "demo1"
     euca_delete_keypair "openrc-demo2" "demo2"
     
+    clean_gpu_allocation
+
     echo "Cleanup DONE!"
 }
 
@@ -328,7 +340,7 @@ then
     delete_all_instances "${OPENRC_DEMO2}"
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
-    
+    clean_gpu_allocation
     tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}"
     TEST_NUM=28
 else
