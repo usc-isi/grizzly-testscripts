@@ -62,10 +62,10 @@ function tests_15_to_27() {
 	
 	if [ "$LIBVIRT_TYPE" = "kvm" ]; then
 	    # exclude string with 'lxc'
-	    IMG_NAME=`euca-describe-images | grep -nr "fs" | grep "demo" | grep -v "lxc" | awk '{ print $2}'`
+	    IMG_NAME=`euca-describe-images | grep -nr "fs" | grep "demo" | grep -v "lxc" | grep ami | awk '{ print $2}' | head -n 1`
 	    #IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
 	elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
-	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }'`
+	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }' | head -n 1`
 	    
 	    # for LXC, create many loopback devices to avoid error: 'These required options are missing: device
 	    echo "Creating Loopback Devices for LXC"
