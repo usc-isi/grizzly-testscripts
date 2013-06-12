@@ -64,6 +64,10 @@ bash regression-test.sh -l log.txt -r /root/openrc -p . -h kvm
 - cg1.medium flavor 
   $ bash regression-test.sh - log.txt -r /root/openrc -p . -h lxc -u root -f cg1.medium
 
+- Note that for tests15-27 that includes add file contents, the user must be specified as 'nova'
+  instead of the default for the keypair to work:
+  $ clear; bash regression-test.sh -r /root/openrc -l log.txt -h lxc -t 230 -f cg1.medium -u nova
+
 
 ############## Other Functions ###############
 
