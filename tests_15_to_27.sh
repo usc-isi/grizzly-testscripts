@@ -12,6 +12,7 @@ function tests_15_to_27() {
     local FLAVOR=$4
     local USER=$5
     local TIMEOUT=$6
+    local SLEEP=$7
     local msg
     
     TENANT1=demo1
@@ -90,7 +91,7 @@ function tests_15_to_27() {
 	    echo "---------------------------------------------------------------------------"
 	    RET=`euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME`
 	    echo " Please wait until one instance is running"
-	    sleep 60
+	    sleep ${SLEEP}
 	    for k in `seq 1 $TIMEOUT`; do
 		INST_ID=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print $2 }'`
                 if [ "${LIBVIRT_TYPE}" = "kvm" ]
@@ -128,7 +129,7 @@ function tests_15_to_27() {
 	    msg="euca-create-volume -s 1 -z nova"
 	    print_test_msg "${testNum}" "${msg}" 
 	    RET=`euca-create-volume -s 1 -z nova`
-	    sleep 30
+	    sleep ${SLEEP}
 		
 	    msg="Checking to make sure created volumes are available"
 	    command="euca-describe-volumes"
@@ -159,8 +160,7 @@ function tests_15_to_27() {
 	    msg="euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb"
 	    print_test_msg "${testNum}" "${msg}"
 	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb`
-	    sleep 30
-	    
+	    sleep ${SLEEP}
 
 	    msg="Checking to make sure created volumes are attached"
 	    command=" euca-describe-volumes"
@@ -194,7 +194,7 @@ function tests_15_to_27() {
 	    msg="Detach and re-attach volume with added contents to verify contents persistent"
 	    print_test_msg "${testNum}" "${msg}"
 	    $(detach_volume "${volume}")
-	    sleep 30;
+	    sleep ${TIMEOUT}
 	    
 	    attached=$(volume_attached "${volume}")
 	    status=$(volume_status "${volume}")
@@ -211,7 +211,7 @@ function tests_15_to_27() {
 	    fi
 	    
 	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb`
-	    sleep 30
+	    sleep ${TIMEOUT}
 	    attached=$(volume_attached "${volume}")
 	    status=$(volume_status "${volume}")
 	    state=$(volume_state "${volume}")
@@ -255,7 +255,7 @@ function tests_15_to_27() {
 		echo " euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc"
 		echo "---------------------------------------------------------------------------"
 		RET=`euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc`
-		sleep 30
+		sleep ${TIMEOUT}
 		
 		msg="Checking to make sure volume not attached to unauthorized instance"
 		command=" euca-describe-volumes"
@@ -283,7 +283,7 @@ function tests_15_to_27() {
 		command="euca-attach-volume ${OTHER_VOLUME} -i ${INST_ID} -d /dev/vdc"
 		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-attach-volume ${OTHER_VOLUME} -i ${INST_ID} -d /dev/vdc`
-		sleep 30
+		sleep ${TIMEOUT}
 		
 		msg=" Checking to make sure unauthorized volume not attached to instance"
 		command=" euca-describe-volumes"
@@ -311,7 +311,7 @@ function tests_15_to_27() {
 		msg="euca-detach-volume ${volume} "
 		print_test_msg "${testNum}" "${msg}"
 		RET=`euca-detach-volume ${volume}`
-		sleep 30    
+		sleep ${SLEEP}    
 		    
 		msg=" Checking to make sure attached volumes are de-attached"
 		command=" euca-describe-volumes"
@@ -337,7 +337,7 @@ function tests_15_to_27() {
 		command="euca-attach-volume ${volume} "
 		print_test_command_msg "${testNum}" "${msg}" "${command}"
 		RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdc`
-		sleep 30
+		sleep ${TIMEOUT}
 		
 		msg=" Checking to make sure attached volumes are attached"
 		command=" euca-describe-volumes"
@@ -369,7 +369,7 @@ function tests_15_to_27() {
 		echo "---------------------------------------------------------------------------"
 		source ./openrc-$TENANT1
 		RET=`euca-detach-volume ${volume}`
-		sleep 30
+		sleep ${SLEEP}
 		
 		msg=" Checking to make sure volume was not attached"
 		command=" euca-describe-volumes"
@@ -427,7 +427,7 @@ function tests_15_to_27() {
 		echo " 26. euca-delete-volume ${volume}"
 		echo "---------------------------------------------------------------------------"
 		RET=`euca-delete-volume ${volume}`
-		sleep 30
+		sleep ${SLEEP}
 		status=`echo $RET | awk '{ print $5}'`
 		volume=`echo $RET | awk '{ print $2}'`
 		displayName=`echo $RET | awk '{ print $3}'`
@@ -456,10 +456,10 @@ function tests_15_to_27() {
 		echo "---------------------------------------------------------------------------"
 		RET=`euca-delete-volume ${OTHER_VOLUME}`
 		TEST_OUT=`euca-delete-volume ${OTHER_VOLUME} 2>&1`
-		sleep 30
+		sleep ${SLEEP}
 		status=`echo $RET | awk '{ print $5}'`
 		volume=`echo $RET | awk '{ print $2}'`
-		sleep 30
+		sleep ${SLEEP}
 		echo "RET: ${RET}"
 		echo "TEST_OUT: ${TEST_OUT}"
 		#if [ "${status}" != "deleting" ] && [ "${status}" != "" ]

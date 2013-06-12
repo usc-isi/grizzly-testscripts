@@ -12,6 +12,7 @@ function tests_7_to_14() {
     local FLAVOR=$4
     local USER=$5
     local TIMEOUT=$6
+    local SLEEP=$7
     local openrc
     local msg
     local msg2
@@ -65,7 +66,7 @@ $TENANT2
 	    echo "---------------------------------------------------------------------------"
 	    RET=`euca-run-instances -k $KEY_NAME -t $FLAVOR $IMG_NAME`
 	    echo " Please wait until one instance is running"
-	    sleep 60 
+	    sleep ${SLEEP} 
 	    for k in `seq 1 $TIMEOUT`; do
 		INST_ID=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print $2 }' | head -n 1`
 		if [ "${LIBVIRT_TYPE}" = "kvm" ]
@@ -126,7 +127,7 @@ $TENANT2
 		echo "12. euca-terminate-instances $INST_ID" 
 		echo "---------------------------------------------------------------------------"
 		RET=`euca-terminate-instances $INST_ID`
-		sleep 20 
+		sleep ${SLEEP} 
 		for k in `seq 1 $TIMEOUT`; do
 		    RET=`euca-describe-instances | grep $KEY_NAME | grep $INST_ID`
 		    if [ "$RET" = "" ]; then
@@ -147,7 +148,7 @@ $TENANT2
 		echo "---------------------------------------------------------------------------"
 		RET=`euca-run-instances -k $KEY_NAME -n $INST_CNT -t $FLAVOR $IMG_NAME`
 		echo " Please wait until $INST_CNT instances are running"
-		sleep 60
+		sleep ${SLEEP}
 		for k in `seq 1 $TIMEOUT`; do
 		    RET=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep running |  awk '{ print $2 }'`
 		    MULTI_ID=$RET
@@ -181,7 +182,7 @@ $TENANT2
 		    IFS=$'\n'
 		    ary=($RET)
 		    RET2=`euca-terminate-instances $RET`
-		    sleep 30
+		    sleep ${SLEEP}
 		    ALL_SET=1
 		    for n in `seq 0 $INST_CNT_1`; do
 			TERM=`euca-describe-instances | grep $KEY_NAME | grep $IMG_NAME | grep ${ary[$n]} | awk '{ print $2 }'`

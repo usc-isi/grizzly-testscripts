@@ -31,6 +31,7 @@ declare OPENRC_DEMO2=openrc-demo2
 declare HYPERVISOR=kvm
 declare IMAGE=kvm_fs
 declare TIMEOUT=60
+declare SLEEP=100
 declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
@@ -51,7 +52,8 @@ Syntax
 -u (user, default root)
 -S (Start Test Number)
 -E (End Test Number)
--T (TimeOut Period: default 60 Seconds)
+-s (SLEEP Period to wait for instances to run)
+-t (TimeOut Period: default 60 Seconds)
 
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova
 
@@ -103,7 +105,7 @@ function do_get_options(){
     echo "Processing Command Line Parameters..."
     opts="$@"
 
-    while getopts h:f:i:r:p:u:t:m:n:l:S:E: opts
+    while getopts h:f:i:r:p:u:t:m:n:l:S:E:s: opts
     do
         case ${opts} in
             n)
@@ -138,6 +140,9 @@ function do_get_options(){
 		;;
 	    E)
 		END_TEST_NUM=${OPTARG}
+		;;
+	    s)
+		SLEEP=${OPTARG}
 		;;
             t)
                 TIMEOUT=${OPTARG}
@@ -307,7 +312,7 @@ function cleanup_env() {
     
     echo "Removing any leftover nova instances..."
     rm -rf /var/lib/nova/instances/_base/*
-    rm -rf /var/lib/nova/instances/*-*
+    #rm -rf /var/lib/nova/instances/*-*
 
     echo "Cleanup DONE!"
 }
@@ -333,7 +338,7 @@ init_env
 # Mikyung's tests
 if [[ ${TEST_NUM} -lt "7" ]]
 then
-    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}"
+    tests_7_to_14 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}" "${SLEEP}"
     TEST_NUM=15
 else
     echo "Skipping Tests:7-14"
@@ -348,7 +353,7 @@ then
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
     clean_gpu_allocation
-    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}"
+    tests_15_to_27 "${LOG_FILE}" "${OPENRC_PATH}" "${HYPERVISOR}" "${FLAVOR}" "${USER}" "${TIMEOUT}" "${SLEEP}"
     TEST_NUM=28
 else
     echo "Skipping Tests:15-27"
