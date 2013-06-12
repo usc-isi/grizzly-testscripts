@@ -76,7 +76,7 @@ function tests_15_to_27() {
 	
 	if [ "$IMG_NAME" ]; then
 	    
-	    KEY_NAME=keypair-$j
+	    KEY_NAME=eucakeypair-$j
 	    KEY=$KEY_NAME.pem
 	    KEY_EXIST=`euca-describe-keypairs | grep $KEY_NAME | awk '{ print $2 }'`
 	    if [ "$KEY_EXIST" != "$KEY_NAME" ]; then
