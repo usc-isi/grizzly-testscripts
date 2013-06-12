@@ -20,7 +20,7 @@ function tests_15_to_27() {
     
     declare INST_IP
     declare INST_ID
-    declare KEYNAME
+    declare KEY_NAME
     declare KEY
     declare KEY_EXIST
     declare VOLUME
@@ -28,7 +28,7 @@ function tests_15_to_27() {
     
     declare OTHER_INST_IP
     declare OTHER_INST_ID
-    declare OTHER_KEYNAME
+    declare OTHER_KEY_NAME
     declare OTHER_VOLUME
     
     declare FILE=hello.txt
