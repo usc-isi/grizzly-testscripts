@@ -31,14 +31,14 @@ Additional images are necessary for several of the subscripts (update README as 
 -r (openrc_root full path, default /root/openrc)                                                                      
 -p (path to openrc-demo1/2, default /root/jp_scripts/)                                                               
 
--t (timeout period, recommended 100 for KVM, 200 for LXC)
- 
+-s (SLEEP Period to wait for instances to run) 
+-t (timeout period, recommended 100 for KVM, 200 for LXC) 
+
 -l (log file for test outputs (Pass/Fail)                                                                             
 -m (the Member role, default Member)                                                                                  
 -n (network, default public)                                                                                          
 -u (user, default root)                                                                                               
--S (Start Test Number)                                                                                               
-
+-S (Start Test Number)                                                                                            
 -E (End Test Number)                                                                                               
                                                                                                                       
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova    
