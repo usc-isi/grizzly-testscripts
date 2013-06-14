@@ -13,12 +13,13 @@ function tests_66_to_76() {
 
     local timeoutWait=$4
     local name=cirros-0.3.1
-    local image=cirros-0.3.1-x86_64-disk.img
+    #local image=cirros-0.3.1-x86_64-disk.img
+    local image=$5
     local image_url=http://download.cirros-cloud.net/0.3.1/$image
     local imageUploaded=false
     
     source ${openrc_user1}
-    nova keypair-delete key70;                                                                                         
+    nova keypair-delete key70;                                                                                        
     /bin/rm key70.pem;                                                                          
 
     echo " ============================================================== "
@@ -174,7 +175,7 @@ function tests_66_to_76() {
 	if [ "`glance image-update $privateName --is-public False | grep is_public | grep -i false`" ]; then
 	    msg="Step#${testNum} Successfully DONE"
 	else
-	    msg="Step#$testNum Failed to change image is_public status"
+	    msg="Step#${testNum} Failed to change image is_public status"
 	fi
 	echo "${msg}"
         write_log "${msg}" "${log}"

@@ -31,6 +31,8 @@ function tests_15_to_27() {
     declare OTHER_INST_ID
     declare OTHER_KEY_NAME
     declare OTHER_VOLUME
+    declare DEV_NAME=""
+    declare DEV_LETTERS=""
     
     declare FILE=hello.txt
     declare CONTENTS="hello from Malek"
@@ -65,16 +67,18 @@ function tests_15_to_27() {
 	    # exclude string with 'lxc'
 	    IMG_NAME=`euca-describe-images | grep -nr "fs" | grep "demo" | grep -v "lxc" | grep ami | awk '{ print $2}' | head -n 1`
 	    #IMG_NAME=`euca-describe-images | grep fs | awk '{ print $2}'`
+	    DEV_LETTERS="vd"
 	elif [ "$LIBVIRT_TYPE" = "lxc" ]; then
 	    IMG_NAME=`euca-describe-images | grep $j | grep lxc_fs | grep ami | awk '{ print $2 }' | head -n 1`
-	    
+	    DEV_LETTERS="sd"
 	    # for LXC, create many loopback devices to avoid error: 'These required options are missing: device
 	    echo "Creating Loopback Devices for LXC"
 	    MAKEDEV -v /dev/loop
 	else
 	    echo "ERROR: Unknown LIBVIRT_TYPE: ${LIBVIRT_TYPE}"
 	fi
-	
+	DEV_NAME="/dev/${DEV_LETTERS}b"
+
 	if [ "$IMG_NAME" ]; then
 	    
 	    KEY_NAME=eucakeypair-$j
@@ -177,16 +181,39 @@ function tests_15_to_27() {
                 write_log "${msg}" "${log}"
 		exit 1
 	    else
-		
+	       	    
+
+                # With variables set, both kvm and lxc should work the same
+                ## make ext3 fs partition and format it                                                           
 		echo "VOLUME: ${volume} attached, now ssh to add contents..."
 		echo " Step8. ssh -i ${openrc_path}$KEY $USER@$INST_IP"
-		COMMAND=`echo "${CONTENTS}" >& $FILE`
-		ssh -i ${openrc_path}$KEY $USER@$INST_IP 'echo "Hello from Malek" >& hello.txt; ls; cat hello.txt'
-		msg=" =====> Step#16. is successfully DONE."
+		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "ls $DEV_NAME"
+		echo "Looking for $DEV_NAME after attaching: $STATUS"
+		
+		if [ "$STATUS" == "$DEV_NAME" ];
+		then
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mkfs -t ext3 $DEV_NAME"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $DEV_NAME /mnt"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "echo Hello > /mnt/Hello.txt"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt"
+		
+		    if [ "$STATUS" == "Hello" ];
+		    then
+			msg="=== PASSED Step#${testNum}: Format, write and read back"
+		    else
+			msg="=== FAILED Step#${testNum}: Read back $STATUS"
+		    fi
+		    
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "umount /mnt"
+		else
+		    msg="=== FAILED Step#${testNum}: Device $DEV_NAME is not present in the guest: $STATUS"
+		fi
+		
 		echo "${msg}"
-                write_log "${msg}" "${log}"
+		write_log "${msg}" "${log}"
+
 	    fi
-	    
+
             # Now detach volume new file was added to, and then re-attach and verify file exists
 #	    source ./openrc-$j
 	    source ${openrc}

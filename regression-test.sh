@@ -377,7 +377,11 @@ fi
 if [[ ${TEST_NUM} -gt "27" ]] && [[ ${TEST_NUM} -lt "38" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env "${DELETE_IMAGES}"
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
+
     tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}" "${TIMEOUT}"
     TEST_NUM=39
 else
@@ -388,7 +392,11 @@ fi
 if [[ ${TEST_NUM} -gt "38" ]] && [[ ${TEST_NUM} -lt "52" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env "${DELETE_IMAGES}"
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
+
     tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}" "${IMAGE}" "${TIMEOUT}"
     TEST_NUM=53
 else
@@ -414,9 +422,12 @@ fi
 if [[ ${TEST_NUM} -gt "65" ]] && [[ ${TEST_NUM} -lt "76" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
     
-    tests_66_to_76 "${LOG_FILE}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${TIMEOUT}"
+    tests_66_to_76 "${LOG_FILE}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${TIMEOUT}" "${IMAGE}"
 else
     echo "Skipping Tests:66-76"
 fi
