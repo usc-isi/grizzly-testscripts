@@ -73,7 +73,6 @@ function tests_15_to_27() {
 	    DEV_LETTERS="sd"
 	    # for LXC, create many loopback devices to avoid error: 'These required options are missing: device
 	    echo "Creating Loopback Devices for LXC"
-	    MAKEDEV -v /dev/loop
 	else
 	    echo "ERROR: Unknown LIBVIRT_TYPE: ${LIBVIRT_TYPE}"
 	fi
