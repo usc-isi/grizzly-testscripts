@@ -45,7 +45,7 @@ function err() {
 
 # Create the log file (if necessary) and append a timestamp                                                       
 function start_log() {
-    # delete the log file if it exists from previous installation                                                
+    # delete the log file if it exists from previous experiment run                                                
     local LOG_FILE=$1
 
     echo "starting log file: ${LOG_FILE}"
@@ -55,7 +55,7 @@ function start_log() {
     touch ${LOG_FILE}
     chmod 600 ${LOG_FILE}
     set +o xtrace
-    echo "$(date) $BASENAME: installation process initiated ($PARAMETERS)" >> $LOG_FILE
+    echo "$(date) $BASENAME: testing process initiated ($PARAMETERS)" >> $LOG_FILE
 
 }
 
@@ -159,10 +159,11 @@ function get_status(){
 
 # TODO: The following 2 functions do the same, and should be merged
 function makeAddKey {
-  # $1 is keypair name, $2 is key file name to be created, $3 is nova params
-  ssh-keygen -f $2 -N ''
-  chmod 600 $2.pub
-  nova $3 keypair-add --pub-key "$2.pub" $1
+    # $1 is keypair name, $2 is key file name to be created, $3 is nova params
+    echo "MakeAddKey: keypair: $1 | toFile: $2 | novaparams: $3"
+    ssh-keygen -f $2 -N ''
+    chmod 600 $2.pub
+    nova $3 keypair-add --pub-key "$2.pub" $1
 }
 
 function do_create_keypair(){

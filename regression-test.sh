@@ -35,12 +35,14 @@ declare SLEEP=100
 declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
+declare DELETE_IMAGES=false
 
 export LANG=C
 
 function usage() {
     cat << USAGE
 Syntax
+-d (delete images? default: false)
 -h (hypervisor LXC or KVM, default KVM)
 -f (flavor, default m1.tiny)
 -i (image, default kvm_fs)
@@ -79,6 +81,7 @@ SLEEPTIME: ${SLEEP}
 TIMEOUT: ${TIMEOUT}
 START_TEST: ${START_TEST_NUM}
 END_TEST: ${END_TEST_NUM}
+DELETE_IMAGES: ${DELETE_IMAGES}
 CONFIG
 
 INSTALLMSG="TEST Scripts will run with the above parameters \n
@@ -106,9 +109,12 @@ function do_get_options(){
     echo "Processing Command Line Parameters..."
     opts="$@"
 
-    while getopts h:f:i:r:p:u:t:m:n:l:S:E:s: opts
+    while getopts d:h:f:i:r:p:u:t:m:n:l:S:E:s: opts
     do
         case ${opts} in
+	    d)
+		DELETE_IMAGES=true
+		;;
             n)
                 NETWORK=${OPTARG}
                 ;;
@@ -177,7 +183,7 @@ function init_env() {
     remove_known_hosts
 
     # Clean up environment prior to new initialization
-    cleanup_env
+    cleanup_env "${DELETE_IMAGES}"
 
     # Start log activity for Tests Pass/Fail
     start_log "${LOG_FILE}"
@@ -287,6 +293,8 @@ function clean_gpu_allocation() {
 # Function to do full clean
 function cleanup_env() {
 
+    local delete_images=$1
+
     echo "======================================================"
     echo "------ Cleaning Up All Instances/Images/Volumes ------"
     echo "======================================================"
@@ -295,9 +303,17 @@ function cleanup_env() {
     delete_all_instances "${OPENRC_DEMO1}"
     delete_all_instances "${OPENRC_DEMO2}"
 
-    clean_glance_repo "${OPENRC_ROOT}"
-    clean_glance_repo "${OPENRC_DEMO1}"
-    clean_glance_repo "${OPENRC_DEMO2}"
+    if [ "${delete_images}" == "true" ]
+    then
+	clean_glance_repo "${OPENRC_ROOT}"
+	clean_glance_repo "${OPENRC_DEMO1}"
+	clean_glance_repo "${OPENRC_DEMO2}"
+
+	echo "removing any leftover glance images..."
+	rm -rf /var/lib/glance/images/*
+    else
+	echo "Not deleting Glance Images"
+    fi
 
     delete_all_volumes "${OPENRC_ROOT}"
     delete_all_volumes "${OPENRC_DEMO1}"
@@ -307,9 +323,6 @@ function cleanup_env() {
     euca_delete_keypair "openrc-demo2" "demo2"
     
     clean_gpu_allocation
-
-    echo "removing any leftover glance images..."
-    rm -rf /var/lib/glance/images/*
     
     echo "Removing any leftover nova instances..."
     rm -rf /var/lib/nova/instances/_base/*
@@ -364,7 +377,7 @@ fi
 if [[ ${TEST_NUM} -gt "27" ]] && [[ ${TEST_NUM} -lt "38" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env
+    cleanup_env "${DELETE_IMAGES}"
     tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}" "${TIMEOUT}"
     TEST_NUM=39
 else
@@ -375,7 +388,7 @@ fi
 if [[ ${TEST_NUM} -gt "38" ]] && [[ ${TEST_NUM} -lt "52" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env
+    cleanup_env "${DELETE_IMAGES}"
     tests_39_to_52 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_DEMO1}" "${OPENRC_DEMO2}" "${FLAVOR}" "${IMAGE}" "${TIMEOUT}"
     TEST_NUM=53
 else
@@ -386,8 +399,11 @@ fi
 if [[ ${TEST_NUM} -gt "52" ]] && [[ ${TEST_NUM} -lt "65" ]]
 then
     echo "Cleanup before next Set of Tests"
-    cleanup_env
- 
+    delete_all_instances "${OPENRC_DEMO1}"
+    delete_all_instances "${OPENRC_DEMO2}"
+    delete_all_volumes "${OPENRC_DEMO1}"
+    delete_all_volumes "${OPENRC_DEMO2}"
+
     tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}" "${TIMEOUT}"
     TEST_NUM=66
 else

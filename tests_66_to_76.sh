@@ -143,6 +143,10 @@ function tests_66_to_76() {
 	fi
 	echo "${msg}"
         write_log "${msg}" "${log}"
+    else
+	msg="Could not run Step#${testNum} because snapshotInstance Not OK from previous Step"
+	echo "${msg}"
+        write_log "${msg}" "${log}"
     fi
 
     testNum=72
