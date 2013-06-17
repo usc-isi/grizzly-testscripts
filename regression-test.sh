@@ -394,7 +394,7 @@ then
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
 
-    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}" "${TIMEOUT}"
+    tests_28_to_38 "${LOG_FILE}" "${OPENRC_ROOT}" "${OPENRC_PATH}" "${TIMEOUT}" "${SLEEP}"
     TEST_NUM=39
 else
     echo "Skipping Tests:28-38"

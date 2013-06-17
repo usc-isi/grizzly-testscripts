@@ -13,6 +13,7 @@ function tests_28_to_38() {
     local openrc_admin=$2
     local openrc_path=$3
     local timeoutWait=$4
+    local sleepWait=$5
     local openrc
     local msg
 
@@ -20,7 +21,6 @@ function tests_28_to_38() {
     echo " ================ Starting Tests 28-38 ======================== "
     echo " ============================================================== "
 
-    sleepWait=5
     name=cirros-0.3.1
     image=cirros-0.3.1-x86_64-disk.img
     image_url=http://download.cirros-cloud.net/0.3.1/$image
@@ -30,13 +30,10 @@ function tests_28_to_38() {
     private_image=$bundle_private/$image.manifest.xml
     public_image=$bundle_public/$image.manifest.xml
 
-
-    trap "{
-    echo 'In trap'
+    # image may not previously exist, so no need for it to be in trap
     source ${openrc_admin};
     nova image-delete $private_image;
     nova image-delete $public_image;
-}" EXIT
     
 
     testNum=28
@@ -165,7 +162,7 @@ function tests_28_to_38() {
     testNum=35
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: make a public image private"
+    echo "Step#${testNum} user: make a public image private"
     echo "---------------------------------------------------------------------------"
     
     euca_describe_images_output=$(euca-describe-images | grep $public_image_id)
@@ -196,7 +193,7 @@ function tests_28_to_38() {
     testNum=36
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: make a public image to private image owned by another user (should fail)"
+    echo "Step#${testNum} user: make a public image to private image owned by another user (should fail)"
     echo "---------------------------------------------------------------------------"    
 
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
@@ -231,7 +228,7 @@ function tests_28_to_38() {
     echo == Test $testNum user: delete an image 
     echo " "
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: delete an image"
+    echo "Step#${testNum} user: delete an image"
     echo "---------------------------------------------------------------------------"
     
     source ${openrc_admin}
@@ -258,7 +255,7 @@ function tests_28_to_38() {
     testNum=38
 
     echo "---------------------------------------------------------------------------"
-    echo "Step#${$testNum} user: delete an unauthorized image (should fail)"
+    echo "Step#${testNum} user: delete an unauthorized image (should fail)"
     echo "---------------------------------------------------------------------------"
     openrc="${openrc_path}/openrc-demo2"
     echo "Sourcing Credentials Files: ${openrc}"
@@ -283,11 +280,4 @@ function tests_28_to_38() {
     echo "${msg}"
     write_log "${msg}" "${log}"
 
-    # clean up
-    echo 
-    echo 
-    echo TEST COMPLETED - CLEANUP
-    echo 
-    
-    clean_glance_repo "${openrc_admin}"
 }
