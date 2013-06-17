@@ -224,6 +224,12 @@ function init_env() {
     echo "export S3_URL=http://127.0.0.1:3333" >> ${OPENRC_DEMO1}
     echo "export EC2_USER_ID=42" >> ${OPENRC_DEMO1}
 
+    # EC2 test-specific (28-38) 
+    echo "export EC2_PRIVATE_KEY=pk1.pem" >> ${OPENRC_DEMO1}
+    echo "export EC2_CERT=cert1.pem" >> ${OPENRC_DEMO1}
+    echo "export NOVA_CERT=cacert.pem" >> ${OPENRC_DEMO1}
+    echo "export EUCALYPTUS_CERT=${NOVA_CERT}" >> ${OPENRC_DEMO1}
+
     echo "Deleting old file: ${OPENRC_DEMO2} before generating new credentials"
     rm ${OPENRC_DEMO2}
 
@@ -238,6 +244,12 @@ function init_env() {
     echo "export S3_URL=http://127.0.0.1:3333" >> ${OPENRC_DEMO2}
     echo "export EC2_USER_ID=42" >> ${OPENRC_DEMO2}
     
+    # EC2 test-specific (28-38)
+    echo "export EC2_PRIVATE_KEY=pk2.pem" >> ${OPENRC_DEMO2}
+    echo "export EC2_CERT=cert2.pem" >> ${OPENRC_DEMO2}
+    echo "export NOVA_CERT=cacert.pem" >> ${OPENRC_DEMO2}
+    echo "export EUCALYPTUS_CERT=${NOVA_CERT}" >> ${OPENRC_DEMO2}
+
     source ${OPENRC_DEMO1}
     echo "add KVM image to glance for demo1"
     DEMO1_KERNEL=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
