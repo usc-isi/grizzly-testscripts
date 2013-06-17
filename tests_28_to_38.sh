@@ -21,9 +21,8 @@ function tests_28_to_38() {
     echo " ================ Starting Tests 28-38 ======================== "
     echo " ============================================================== "
 
-    name=cirros-0.3.1
-    image=cirros-0.3.1-x86_64-disk.img
-    image_url=http://download.cirros-cloud.net/0.3.1/$image
+    name=ttylinux
+    image=ttylinux-uec-amd64-12.1_2.6.35-22_1.img
     imageUploaded=false
     bundle_private=private
     bundle_public=public
@@ -35,6 +34,11 @@ function tests_28_to_38() {
     nova image-delete $private_image;
     nova image-delete $public_image;
     
+    if [ ! -e "${image}" ]
+    then
+	echo "Tests:28-38 require image: ${image}"
+	exit 1
+    fi
 
     testNum=28
     echo " "

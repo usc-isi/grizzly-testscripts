@@ -244,27 +244,44 @@ function tests_15_to_27() {
 	    if [ "${attached}" == "true" ]
 	    then
 		echo "Verifying if File: $FILE Exists"
-		ssh -i ${openrc_path}$KEY $USER@$INST_IP '
-	  if [ ! -e "hello.txt" ]
-	  then
-	      msg="Step 19. Failed. FILE DOES NOT EXIST!"
-              echo "${msg}"
-              write_log "${msg}" "${log}"
-	      ls
-	      exit
-	  else
-	      echo "FILE EXISTS";
-	      echo "File Contents:";
-	      cat hello.txt;
-	      msg=echo "Step 19. is successfully DONE."
-              echo "${msg}"
-              write_log "${msg}" "${log}"
-	  fi'
-	    else
-		echo "Re-attachment of content verification volume failed"
-		exit 1
-	    fi
+		#ssh -i ${openrc_path}$KEY $USER@$INST_IP '
+	 # if [ ! -e "hello.txt" ]
+	 # then
+	 #     msg="Step 19. Failed. FILE DOES NOT EXIST!"
+         #     echo "${msg}"
+         #     write_log "${msg}" "${log}"
+	 #     ls
+	 #     exit
+	 # else
+	 #     echo "FILE EXISTS";
+	 #     echo "File Contents:";
+	 #     cat hello.txt;
+	 #     msg=echo "Step 19. is successfully DONE."
+         #     echo "${msg}"
+         #     write_log "${msg}" "${log}"
+	 # fi'
+	 #   else
+	#	echo "Re-attachment of content verification volume failed"
+	#	exit 1
+	#    fi
 	    
+		NEW_DEV=""
+		sendSshAndGet NEW_DEV "${openrc_path}$KEY" "${INST_IP}" "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a"
+		echo "Found reattached volume as $NEW_DEV"
+		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $NEW_DEV /mnt"
+		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt"
+		if [ "$STATUS" == "Hello" ];
+		then
+		    msg="=== PASSED Test 19: Read content from reattached volume"
+		else
+		    msg="=== FAILED Test 19: Reading reattached volume: $STATUS"
+		fi
+		write_log "${msg}" "${log}"
+	    else
+		msg="Re-attachment of content verification volume failed"
+		write_log "${msg}" "${log}"
+	    fi
+
 	    if [ $j == $TENANT2 ]; then
 		testNum=17
 		msg="Attach a volume to an unauthorized instance"
