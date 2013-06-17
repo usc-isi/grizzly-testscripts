@@ -79,7 +79,7 @@ $TENANT2
 		if [ -z $INST_IP ]; then
 		    msg=" =====> Step#7. is not running yet: $INST_ID $INST_IP"
 		    echo "${msg}"
-		    write_log "${msg}" "${log}"
+		    #write_log "${msg}" "${log}"
 		else
 		    msg=" =====> Step#7. is successfully DONE: $INST_ID $INST_IP"
 		    echo "${msg}"
