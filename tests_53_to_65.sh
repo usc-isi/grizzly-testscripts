@@ -233,7 +233,7 @@ function tests_53_to_65() {
         ## Check contents
         NEW_DEV=""
         sendSshAndGet NEW_DEV $KEY_FILE $KVM_IP "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a"
-        echo "Found reaatached volume as $NEW_DEV"
+        echo "Found reattached volume as $NEW_DEV"
         sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $NEW_DEV /mnt"
         sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
         if [ "$STATUS" == "Hello" ];

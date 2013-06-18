@@ -11,9 +11,11 @@ function tests_28_to_38() {
 
     local log=$1
     local openrc_admin=$2
-    local openrc_path=$3
-    local timeoutWait=$4
-    local sleepWait=$5
+    local openrc_demo1=$3
+    local openrc_demo2=$4
+    local openrc_path=$5
+    local timeoutWait=$6
+    local sleepWait=$7
     local openrc
     local msg
 
@@ -30,6 +32,7 @@ function tests_28_to_38() {
     public_image=$bundle_public/$image.manifest.xml
 
     # image may not previously exist, so no need for it to be in trap
+    echo "Sourcing Credentials Files: ${openrc_admin}"
     source ${openrc_admin};
     nova image-delete $private_image;
     nova image-delete $public_image;
@@ -45,7 +48,9 @@ function tests_28_to_38() {
     echo "---------------------------------------------------------------------------"
     echo "Step#${testNum} user: upload a new public image"
     echo "---------------------------------------------------------------------------"
-    
+
+    echo "Sourcing Credentials Files: ${openrc_demo1}"
+    source ${openrc_demo1};
     euca-bundle-image -i $image
     euca-upload-bundle -b $bundle_public -m /tmp/$image.manifest.xml
     public_image_id=$(euca-register $bundle_public/$image.manifest.xml | cut -f2)
@@ -131,8 +136,8 @@ function tests_28_to_38() {
 	write_log "${msg}" "${log}"
     fi
 
-    echo "Sourcing ADMIN Credentials File: ${openrc_admin}"
-    source ${openrc_admin}
+    #echo "Sourcing ADMIN Credentials File: ${openrc_admin}"
+    #source ${openrc_admin}
     
     testNum=34
     echo " "
@@ -179,7 +184,7 @@ function tests_28_to_38() {
 	echo euca_describe_images_output $euca_describe_images_output
 	
 	if [ "`glance image-show $public_image | grep is_public | grep -i false`" ]; then
-	    msg="Step#$testNum OK"
+	    msg="Step#$testNum Successfully DONE"
 	else
 	    msg="Step#${testNum} Failed to change image is_public status"
 	fi
@@ -203,9 +208,8 @@ function tests_28_to_38() {
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
     echo euca_describe_images_output $euca_describe_images_output
     
-    openrc="${openrc_path}/openrc-demo2"
-    echo "Sourcing Credentials Files: ${openrc}"
-    source ${openrc}
+    echo "Sourcing Credentials Files: ${openrc_demo2}"
+    source ${openrc_demo2}
 
     if [ "`glance image-show $private_image | grep is_public | grep -i true`" ]; then 
 	euca-modify-image-attribute -l $private_image_id -r all
@@ -235,7 +239,8 @@ function tests_28_to_38() {
     echo "Step#${testNum} user: delete an image"
     echo "---------------------------------------------------------------------------"
     
-    source ${openrc_admin}
+    echo "Sourcing Credentials Files: ${openrc_demo1}"
+    source ${openrc_demo1}
     
     euca_describe_images_output=$(euca-describe-images | grep $public_image_id)
     echo euca_describe_images_output $euca_describe_images_output
@@ -249,7 +254,7 @@ function tests_28_to_38() {
     echo euca_describe_images_output $euca_describe_images_output
     
     if [[ $? -eq 0 && -z "`glance image-list | grep $public_image`" ]]; then
-	msg="Step#${testNum}Successfully DONE"
+	msg="Step#${testNum} Successfully DONE"
     else
 	msg="Step#${testNum} Failed to delete image $public_image"
     fi
@@ -261,13 +266,12 @@ function tests_28_to_38() {
     echo "---------------------------------------------------------------------------"
     echo "Step#${testNum} user: delete an unauthorized image (should fail)"
     echo "---------------------------------------------------------------------------"
-    openrc="${openrc_path}/openrc-demo2"
-    echo "Sourcing Credentials Files: ${openrc}"
-    source ${openrc}
     
     euca_describe_images_output=$(euca-describe-images | grep $private_image_id)
     echo euca_describe_images_output $euca_describe_images_output
     
+    echo "Sourcing Credentials Files: ${openrc_demo2}"
+    source ${openrc_demo2}
     euca-deregister $private_image_id
     if [ $? != 0 ]; then
 	euca-delete-bundle -b private -p $image
@@ -279,7 +283,7 @@ function tests_28_to_38() {
     if [ -z "`glance image-list | grep $private_image`" ]; then
         msg="Step#${testNum} Failed, should not be able to delete $private_image"
     else
-	msg="Step#${testNum} OK"
+	msg="Step#${testNum} Successfully DONE"
     fi
     echo "${msg}"
     write_log "${msg}" "${log}"
