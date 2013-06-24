@@ -224,7 +224,8 @@ function sendSshAndGet {
   local keyfile=$2
   local ip=$3
   local cmd=$4
-  local res=`ssh -i $keyfile -o StrictHostKeyChecking=no root@$ip $cmd`
+  local user=$5
+  local res=`ssh -i $keyfile -o StrictHostKeyChecking=no $user@$ip $cmd`
   eval "$1='$res'"
 }
 

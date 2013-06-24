@@ -33,6 +33,7 @@ function tests_15_to_27() {
     declare OTHER_VOLUME
     declare DEV_NAME=""
     declare DEV_LETTERS=""
+    declare VMNT_NAME=""
     
     declare FILE=hello.txt
     declare CONTENTS="hello from Malek"
@@ -77,6 +78,7 @@ function tests_15_to_27() {
 	    echo "ERROR: Unknown LIBVIRT_TYPE: ${LIBVIRT_TYPE}"
 	fi
 	DEV_NAME="/dev/${DEV_LETTERS}b"
+	VMNT_NAME="/vmnt/${DEV_LETTERS}b"
 
 	if [ "$IMG_NAME" ]; then
 	    
@@ -160,9 +162,9 @@ function tests_15_to_27() {
 	    fi
 	    
 	    testNum=16
-	    msg="euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb"
+	    msg="euca-attach-volume ${volume} -i ${INST_ID} -d ${DEV_NAME}"
 	    print_test_msg "${testNum}" "${msg}"
-	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb`
+	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d ${DEV_NAME}`
 	    sleep ${SLEEP}
 
 	    msg="Checking to make sure created volumes are attached"
@@ -186,31 +188,46 @@ function tests_15_to_27() {
                 ## make ext3 fs partition and format it                                                           
 		echo "VOLUME: ${volume} attached, now ssh to add contents..."
 		echo " Step8. ssh -i ${openrc_path}$KEY $USER@$INST_IP"
-		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "ls $DEV_NAME"
+		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "ls $DEV_NAME" "${USER}"
 		echo "Looking for $DEV_NAME after attaching: $STATUS"
 		
 		if [ "$STATUS" == "$DEV_NAME" ];
 		then
-		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mkfs -t ext3 $DEV_NAME"
-		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $DEV_NAME /mnt"
-		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "echo Hello > /mnt/Hello.txt"
-		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt"
-		
+		    if [ "$LIBVIRT_TYPE" == "kvm" ]
+		    then
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mkfs -t ext3 $DEV_NAME" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $DEV_NAME /mnt" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "echo Hello > /mnt/Hello.txt" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt" "${USER}"
+		    else
+			sendSshAndGet STATUS "${openrc_path}$KEY" "sudo /sbin/mkfs.ext3 $DEV_NAME" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "sudo /bin/mount $DEV_NAME $VMNT_NAME" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "echo Hello > $VMNT_NAME/Hello.txt" "${USER}"
+			sendSshAndGet STATUS "${openrc_path}$KEY" "cat $VMNT_NAME/Hello.txt" "${USER}"
+		    fi
+
 		    if [ "$STATUS" == "Hello" ];
 		    then
 			msg="=== PASSED Step#${testNum}: Format, write and read back"
 		    else
 			msg="=== FAILED Step#${testNum}: Read back $STATUS"
 		    fi
-		    
-		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "umount /mnt"
+		    echo "${msg}"
+		    write_log "${msg}" "${log}"
+
+		    if [ "$LIBVIRT_TYPE" == "kvm" ]
+		    then
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "umount /mnt" "${USER}"
+		    else
+			sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "sudo /bin/umount ${VMNT_NAME}" "${USER}"
+		    fi
+
 		else
 		    msg="=== FAILED Step#${testNum}: Device $DEV_NAME is not present in the guest: $STATUS"
 		fi
 		
 		echo "${msg}"
 		write_log "${msg}" "${log}"
-
 	    fi
 
             # Now detach volume new file was added to, and then re-attach and verify file exists
@@ -236,7 +253,7 @@ function tests_15_to_27() {
                 write_log "${msg}" "${log}"
 	    fi
 	    
-	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d /dev/vdb`
+	    RET=`euca-attach-volume ${volume} -i ${INST_ID} -d ${DEV_NAME}`
 	    sleep ${TIMEOUT}
 	    attached=$(volume_attached "${volume}")
 	    status=$(volume_status "${volume}")
@@ -244,41 +261,31 @@ function tests_15_to_27() {
 	    if [ "${attached}" == "true" ]
 	    then
 		echo "Verifying if File: $FILE Exists"
-		#ssh -i ${openrc_path}$KEY $USER@$INST_IP '
-	 # if [ ! -e "hello.txt" ]
-	 # then
-	 #     msg="Step 19. Failed. FILE DOES NOT EXIST!"
-         #     echo "${msg}"
-         #     write_log "${msg}" "${log}"
-	 #     ls
-	 #     exit
-	 # else
-	 #     echo "FILE EXISTS";
-	 #     echo "File Contents:";
-	 #     cat hello.txt;
-	 #     msg=echo "Step 19. is successfully DONE."
-         #     echo "${msg}"
-         #     write_log "${msg}" "${log}"
-	 # fi'
-	 #   else
-	#	echo "Re-attachment of content verification volume failed"
-	#	exit 1
-	#    fi
 	    
 		NEW_DEV=""
-		sendSshAndGet NEW_DEV "${openrc_path}$KEY" "${INST_IP}" "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a"
-		echo "Found reattached volume as $NEW_DEV"
-		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $NEW_DEV /mnt"
-		sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt"
+		if [ "$LIBVIRT_TYPE" == "kvm" ]
+		then
+		    sendSshAndGet NEW_DEV "${openrc_path}$KEY" "${INST_IP}" "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a" "${USER}"
+		    echo "Found reattached volume as $NEW_DEV"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "mount $NEW_DEV /mnt" "${USER}"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat /mnt/Hello.txt" "${USER}"
+		else
+		    NEW_DEV=$DEV_NAME
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "sudo /bin/mount $NEW_DEV $VMNT_NAME" "${USER}"
+		    sendSshAndGet STATUS "${openrc_path}$KEY" "${INST_IP}" "cat $VMNT_NAME/Hello.txt" "${USER}"
+		fi
+
 		if [ "$STATUS" == "Hello" ];
 		then
 		    msg="=== PASSED Test 19: Read content from reattached volume"
 		else
 		    msg="=== FAILED Test 19: Reading reattached volume: $STATUS"
 		fi
+		echo "${msg}"
 		write_log "${msg}" "${log}"
 	    else
 		msg="Re-attachment of content verification volume failed"
+		echo "${msg}"
 		write_log "${msg}" "${log}"
 	    fi
 
@@ -295,9 +302,17 @@ function tests_15_to_27() {
 		    $(detach_volume "${volume}")
 		fi
 		
-		echo " euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc"
-		echo "---------------------------------------------------------------------------"
-		RET=`euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc`
+		
+		if [ "$LIBVIRT_TYPE" == "kvm" ]
+		then
+		    echo " euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc"
+		    echo "---------------------------------------------------------------------------"
+		    RET=`euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/vdc`
+		else
+                    echo " euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/sdc"
+                    echo "---------------------------------------------------------------------------"
+                    RET=`euca-attach-volume ${volume} -i ${OTHER_INST_ID} -d /dev/sdc`
+		fi
 		sleep ${TIMEOUT}
 		
 		msg="Checking to make sure volume not attached to unauthorized instance"

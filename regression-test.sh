@@ -424,7 +424,7 @@ then
     delete_all_volumes "${OPENRC_DEMO1}"
     delete_all_volumes "${OPENRC_DEMO2}"
 
-    tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}" "${TIMEOUT}"
+    tests_53_to_65 "${LOG_FILE}" "${IMAGE}" "${HYPERVISOR}" "${TIMEOUT}" "${USER}"
     TEST_NUM=66
 else
     echo "Skipping Tests: 53-65"

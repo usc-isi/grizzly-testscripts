@@ -21,6 +21,7 @@ VOL_GOOD_NAME=test53
 VOL_SIZE=1
 DEV_NAME=""
 DEV_LETTERS=""
+VMNT_NAME=""
 #"/dev/vdb"
 VOL_BAD_NAME=test56
 
@@ -30,6 +31,7 @@ function tests_53_to_65() {
     local IMAGE=$2
     local HYPERVISOR=$3
     local TIMEOUT=$4
+    local USER=$5
     local msg
 
     # Pick settings
@@ -46,7 +48,8 @@ function tests_53_to_65() {
 	DEV_LETTERS="sd"
     fi
     DEV_NAME="/dev/${DEV_LETTERS}b"
-      
+    VMNT_NAME="/vmnt/${DEV_LETTERS}b"
+
     echo "Picked flavor $KVM_FLAVOR, device $DEV_NAME, image $IMAGE"
     echo $USER1_PARAM
     echo $USER2_PARAM
@@ -99,7 +102,7 @@ function tests_53_to_65() {
     sleep ${TIMEOUT}
 
     echo "Looking for $DEV_NAME before attaching. It should not be there"
-    sendSshAndGet STATUS $KEY_FILE $KVM_IP "ls $DEV_NAME"
+    sendSshAndGet STATUS "$KEY_FILE" "$KVM_IP" "ls $DEV_NAME" "${USER}"
     
     nova_volumeStatus STATUS "${VOL_GOOD_NAME}" "$USER1_PARAM"
     echo "Status of freshly created volume: $STATUS"
@@ -116,15 +119,23 @@ function tests_53_to_65() {
     # With variables set, both kvm and lxc should work the same
 
     ## make ext3 fs partition and format it
-    sendSshAndGet STATUS "${KEY_FILE}" "${KVM_IP}" "ls $DEV_NAME"
-    echo "Looking for $DEV_NAME after attaching: $STATUS"
+    sendSshAndGet STATUS "${KEY_FILE}" "${KVM_IP}" "ls $DEV_NAME" "${USER}"
+    echo "Looking for $DEV_NAME after attaching: $STATUS" 
     
-    if [ "$STATUS" == "$DEV_NAME" ];
+    if [ "$STATUS" == "$DEV_NAME" ]
     then
-       sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 $DEV_NAME"
-       sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $DEV_NAME /mnt"
-       sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt"
-       sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
+	if [ "$HYPERVISOR" == "kvm" ]
+	then
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "mkfs -t ext3 $DEV_NAME" "${USER}"
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $DEV_NAME /mnt" "${USER}"
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > /mnt/Hello.txt" "${USER}"
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt" "${USER}"
+	else
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "sudo /sbin/mkfs.ext3 $DEV_NAME" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "sudo /bin/mount $DEV_NAME $VMNT_NAME" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "echo Hello > $VMNT_NAME/Hello.txt" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat $VMNT_NAME/Hello.txt" "${USER}"
+	fi
 
        if [ "$STATUS" == "Hello" ];
        then
@@ -133,7 +144,16 @@ function tests_53_to_65() {
            msg="=== FAILED Test 54: Read back $STATUS" 
        fi
 
-       sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
+       echo "${msg}"
+       write_log "${msg}" "${log}"
+
+       if [ "$HYPERVISOR" == "kvm" ]
+       then
+	   sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt" "${USER}"
+       else
+	   sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount ${VMNT_NAME}" "${USER}"
+       fi
+
     else
        msg="=== FAILED Test 54: Device $DEV_NAME is not present in the guest: $STATUS"
     fi
@@ -176,8 +196,7 @@ function tests_53_to_65() {
 
     # Clean up: kill the instance
     echo "Deleting instance $INST_BAD_NAME"
-    nova $USER2_PARAM delete $INST_BAD_NAME 
-    
+    nova $USER2_PARAM delete $INST_BAD_NAME     
 
     # Now have good volume detached and available, kvm instance running.
     #
@@ -232,17 +251,35 @@ function tests_53_to_65() {
 	echo "Volume reattach (test57 kvm) succeeded"
         ## Check contents
         NEW_DEV=""
-        sendSshAndGet NEW_DEV $KEY_FILE $KVM_IP "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a"
+        #sendSshAndGet NEW_DEV $KEY_FILE $KVM_IP "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a"
         echo "Found reattached volume as $NEW_DEV"
-        sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $NEW_DEV /mnt"
-        sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt"
+
+	if [ "$HYPERVISOR" == "kvm" ]
+	then
+	    sendSshAndGet NEW_DEV $KEY_FILE $KVM_IP "ls /dev/${DEV_LETTERS}? | grep -v ${DEV_LETTERS}a" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "mount $NEW_DEV /mnt" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat /mnt/Hello.txt" "${USER}"
+	else
+	    NEW_DEV=$DEV_NAME
+	    sendSshAndGet STATUS $KEY_FILE $KVM_IP "sudo /bin/mount $NEW_DEV $VMNT_NAME" "${USER}"
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "cat $VMNT_NAME/Hello.txt" "${USER}"
+	fi
+
         if [ "$STATUS" == "Hello" ];
         then
             msg="=== PASSED Test 57: Read content from reattached volume"
         else
             msg="=== FAILED Test 57: Reading reattached volume: $STATUS"
         fi
-        sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt"
+	write_log "${msg}" "${log}"
+
+	if [ "$HYPERVISOR" == "kvm" ]
+	then
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "umount /mnt" "${USER}"
+	else
+            sendSshAndGet STATUS $KEY_FILE $KVM_IP "sudo /bin/umount ${VMNT_NAME}" "${USER}"
+	fi
+
     else
 	msg="=== FAIL Test 57: Volume reattach status is $STATUS"
     fi
