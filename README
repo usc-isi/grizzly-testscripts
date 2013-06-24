@@ -25,6 +25,9 @@ Additional images are necessary for several of the subscripts (update README as 
 
 # Options:
 
+-a (add images during init? default: false)                                                                            
+-d (delete images? default: false)   
+
 -h (hypervisor LXC or KVM, default KVM)                                                                               
 -f (flavor, default m1.tiny)                                                                                          
 -i (image, default kvm_fs)                                                                                            
@@ -42,6 +45,9 @@ Additional images are necessary for several of the subscripts (update README as 
 -E (End Test Number)                                                                                               
                                                                                                                       
 e.g: sh tests_39_to_52.sh -h LXC -f cg1.medium -i lxc-fs -r /root/keystonerc -m _member_ -n net1 -p /root/ -u nova    
+# NOTE:
+  By Default, the initialization does not add the images to the glance repository (to reduce repeated run-times. Add '-a 1' to the command line if user wants the default images added to glance.
+
 
 # Run all tests with admin credentials file:/root/openrc and output to log file: log.txt
 e.g. clear; bash regression-test.sh -r /root/openrc/ -l log.txt    

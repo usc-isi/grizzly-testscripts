@@ -35,6 +35,7 @@ declare SLEEP=100
 declare TEST_NUM
 declare START_TEST_NUM=0
 declare END_TEST_NUM=76
+declare ADD_IMAGES=false
 declare DELETE_IMAGES=false
 
 export LANG=C
@@ -42,6 +43,7 @@ export LANG=C
 function usage() {
     cat << USAGE
 Syntax
+-a (add images during init? default: false)
 -d (delete images? default: false)
 -h (hypervisor LXC or KVM, default KVM)
 -f (flavor, default m1.tiny)
@@ -109,9 +111,12 @@ function do_get_options(){
     echo "Processing Command Line Parameters..."
     opts="$@"
 
-    while getopts d:h:f:i:r:p:u:t:m:n:l:S:E:s: opts
+    while getopts a:d:h:f:i:r:p:u:t:m:n:l:S:E:s: opts
     do
         case ${opts} in
+	    a)
+		ADD_IMAGES=true
+		;;
 	    d)
 		DELETE_IMAGES=true
 		;;
@@ -175,7 +180,6 @@ function do_get_options(){
 
 # Function to initialize + setup the environment for
 # openstack testing
-
 function init_env() {
 
     echo "Initializing test-environment"
@@ -251,29 +255,41 @@ function init_env() {
     echo "export EUCALYPTUS_CERT=${NOVA_CERT}" >> ${OPENRC_DEMO2}
 
     source ${OPENRC_DEMO1}
-    echo "add KVM image to glance for demo1"
-    DEMO1_KERNEL=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
-    DEMO1_INITRD=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_initrd" is_public=false container_format=ari disk_format=ari < ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd | awk '{ print $6 } '`
-    glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_fs" is_public=false container_format=ami disk_format=ami kernel_id="$DEMO1_KERNEL" ramdisk_id="$DEMO1_INITRD" < ttylinux-uec-amd64-12.1_2.6.35-22_1.img | awk '{ print $6 } '
 
-    echo "add LXC image to glance for demo1"
-    glance --os_username demo1 --os-password demo1_secrete --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_lxc_fs" is_public=false container_format=ami disk_format=ami < lxc-sudo-fs
-    
+    if [ "${ADD_IMAGES}" == "true" ]
+    then
+	echo "add KVM image to glance for demo1"
+	DEMO1_KERNEL=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
+	DEMO1_INITRD=`glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_initrd" is_public=false container_format=ari disk_format=ari < ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd | awk '{ print $6 } '`
+	glance --os_username demo1 --os-password demo1_secrete --os-tenant-name demo_tenant1 --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_fs" is_public=false container_format=ami disk_format=ami kernel_id="$DEMO1_KERNEL" ramdisk_id="$DEMO1_INITRD" < ttylinux-uec-amd64-12.1_2.6.35-22_1.img | awk '{ print $6 } '
+
+	echo "add LXC image to glance for demo1"
+	glance --os_username demo1 --os-password demo1_secrete --os-auth-url=http://localhost:5000/v2.0/  add name="demo1_lxc_fs" is_public=false container_format=ami disk_format=ami < lxc-sudo-fs
+    else
+	echo "Not Adding Images during init b/c option ADD_IMAGES=${ADD_IMAGE}"
+    fi
+
     echo "create volume for demo1"
     nova volume-create --display-name "demo1" 1
     
 
     source ${OPENRC_DEMO2}
-    echo "add KVM image to glance for demo2"
-    DEMO2_KERNEL=`glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
+
+    if [ "${ADD_IMAGES}" == "true" ]
+    then
+	echo "add KVM image to glance for demo2"
+	DEMO2_KERNEL=`glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_vmlinux" is_public=false container_format=aki disk_format=aki < ttylinux-uec-amd64-12.1_2.6.35-22_1-vmlinuz | awk '{ print $6 } '`
     
-    DEMO2_INITRD=`glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_initrd" is_public=false container_format=ari disk_format=ari < ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd | awk '{ print $6 } '`
+	DEMO2_INITRD=`glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_initrd" is_public=false container_format=ari disk_format=ari < ttylinux-uec-amd64-12.1_2.6.35-22_1-initrd | awk '{ print $6 } '`
     
-    glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_fs" is_public=false container_format=ami disk_format=ami kernel_id="$DEMO2_KERNEL" ramdisk_id="$DEMO2_INITRD" < ttylinux-uec-amd64-12.1_2.6.35-22_1.img | awk '{ print $6 } '
+	glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_fs" is_public=false container_format=ami disk_format=ami kernel_id="$DEMO2_KERNEL" ramdisk_id="$DEMO2_INITRD" < ttylinux-uec-amd64-12.1_2.6.35-22_1.img | awk '{ print $6 } '
     
-    echo "add LXC image to glance for demo2"
-    glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_lxc_fs" is_public=false container_format=ami disk_format=ami < lxc-sudo-fs
-    
+	echo "add LXC image to glance for demo2"
+	glance --os_username demo2 --os-password demo2_secrete --os-tenant-name demo_tenant2 --os-auth-url=http://localhost:5000/v2.0/  add name="demo2_lxc_fs" is_public=false container_format=ami disk_format=ami < lxc-sudo-fs
+    else
+	echo "Not Adding Images during init b/c option ADD_IMAGES=${ADD_IMAGE}"
+    fi
+
     echo "create volume for demo2"
     nova volume-create --display-name "demo2" 1
 
